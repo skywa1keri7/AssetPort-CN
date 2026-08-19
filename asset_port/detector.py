@@ -47,6 +47,7 @@ SUFFIX_MAP ={
     "displacement" : TextureSlot.HEIGHT,
     
     "orm" : TextureSlot.ORM,
+    "rma" : TextureSlot.RMA,
 }
 
 
@@ -187,4 +188,3 @@ class AssetDetector:
                 group.category = asset.category
         
         return list(groups.values())
-            

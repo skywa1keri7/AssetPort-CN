@@ -70,12 +70,16 @@ class AssetImporter():
         self.config = config_loader()
         
     def build_materials(self, group_asset, decisions=None, report= None):
+        if not self.config.auto_create_mi:
+            return
         for group in group_asset:
             mi_report = create_material_instance(group, self.config, decisions)
             if report and mi_report.success:
                 report.mis_created += 1
                 if mi_report.mesh_linked:
                     report.mis_linked += 1
+            if report and mi_report.errors:
+                report.errors.extend(mi_report.errors)
         
     def import_directory(self, source_dir, category, dry_run = False):
         report = PipelineReport()
@@ -180,11 +184,14 @@ class AssetImporter():
                     if not imported_object:
                         continue
                     for obj in imported_object:
-                        texture_settings(obj, asset.texture_slot)
+                        if self.config.auto_configure_textures:
+                            texture_settings(obj, asset.texture_slot)
                         
                         if asset.texture_slot == TextureSlot.BASE_COLOUR:
                             asset.has_alpha = check_source_has_alpha(asset.source_path)
                             unreal.log(f"AssetPort: BaseColour {asset.base_name} has_alpha -> {asset.has_alpha}")
+
+                        unreal.EditorAssetLibrary.save_loaded_asset(obj)
                     
            
         successful_imports = 0

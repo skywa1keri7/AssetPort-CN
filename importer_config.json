@@ -3,8 +3,11 @@
     "parent_material_masked": "/Game/Python/Materials/M_Master_Masked",
     "parent_material_translucent": "/Game/Python/Materials/M_Master_Translucent",
     "auto_create_mi": true,
+    "auto_create_material_fallback": true,
+    "auto_configure_textures": true,
     "auto_assign_to_mesh": true,
     "replace_existing": false,
     "organize_asset": true,
-    "language": "zh_CN"
+    "language": "zh_CN",
+    "opacity_mask_clip_value": 0.333
 }
