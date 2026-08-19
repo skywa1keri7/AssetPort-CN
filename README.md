@@ -2,6 +2,8 @@
 
 AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 的非官方中文增强版。它为 Unreal Engine 5 的批量资源导入流程增加简体中文/英文双语界面，同时保持原项目的英文内部标识与资源命名逻辑，避免本地化影响导入结果。
 
+AssetPort-CN is an unofficial bilingual enhanced fork of [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port). The original project was created by Colosyn (Shahnawaz Hussain) and is distributed under the MIT License. This repository is not affiliated with or endorsed by the original author.
+
 > 当前版本：`0.2.1`。建议先在测试工程中使用。
 
 ## 当前改动
@@ -111,6 +113,7 @@ M_资源名_Auto
 - 原许可证：MIT License
 
 原项目版权声明和 MIT 许可证全文保留在 [LICENSE](LICENSE) 中。
+更完整的来源与修改声明见 [NOTICE](NOTICE)。
 
 ## 开发计划
 

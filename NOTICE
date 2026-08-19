@@ -1,0 +1,18 @@
+AssetPort-CN
+============
+
+This project includes and modifies software from Asset-Port:
+
+  Upstream project: https://github.com/Colosyn/Asset-Port
+  Original author: Colosyn (Shahnawaz Hussain)
+  Original license: MIT License
+
+The original copyright notice and MIT License are preserved in LICENSE.
+AssetPort-CN is an unofficial community modification and is not affiliated
+with or endorsed by the original author.
+
+AssetPort-CN modifications include bilingual Chinese/English UI support,
+automatic material fallback generation, texture compression rules, and
+compatibility with common prefixless marketplace asset names.
+
+Modifications Copyright (c) 2026 skywa1keri7
