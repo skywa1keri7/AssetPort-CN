@@ -2,7 +2,7 @@
 
 AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 的非官方中文增强版。它为 Unreal Engine 5 的批量资源导入流程增加简体中文/英文双语界面，同时保持原项目的英文内部标识与资源命名逻辑，避免本地化影响导入结果。
 
-> 当前版本：`0.2.0`。建议先在测试工程中使用。
+> 当前版本：`0.2.1`。建议先在测试工程中使用。
 
 ## 当前改动
 
@@ -16,6 +16,8 @@ AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 的
 - 自动材质支持 BaseColor、Normal、Roughness、Metallic、AO、Emissive、Opacity、OpacityMask、ORM 和 RMA。
 - 根据贴图用途自动配置压缩方式和 sRGB；遮罩与通道打包图使用 `Masks` 并关闭 sRGB。
 - 明确识别到 OpacityMask 时自动使用 `Masked`，识别到 Opacity 时自动使用 `Translucent`。
+- 不带 `T_`/`SM_` 前缀的常见素材库文件也能按扩展名识别：图片视为纹理，FBX 默认视为静态网格。
+- 自动忽略文件名中的 `2K`、`4K` 等分辨率标记，并识别 Cavity、Gloss、Specular、Bump、Metalness。
 
 ## 自动材质策略
 
@@ -98,6 +100,7 @@ M_资源名_Auto
 - 当前语言通过 JSON 配置切换，窗口内语言选择器将在后续版本加入。
 - 上游 Widget 资源位于 `/Game/Python/Widgets`，当前版本仍依赖该安装路径。
 - 自动生成材质目前连接常用 PBR 输入；Height 只会配置为 Masks，不会擅自连接位移。
+- 无前缀 FBX 默认按静态网格导入；骨骼网格仍建议使用 `SK_` 前缀明确标识。
 
 ## 上游与许可证
 

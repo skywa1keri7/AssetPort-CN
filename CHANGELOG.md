@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.1] - 2026-08-19
+
+### Fixed
+
+- Infer texture/static-mesh types from file extensions when `T_`/`SM_` prefixes are absent.
+- Ignore `2K`/`4K` resolution tokens instead of treating them as material slots.
+- Prevent unknown files from producing empty material groups with a `None` package path.
+- Keep import tasks paired with their detected assets, including UDIM-skipped files.
+- Reconfigure an existing imported texture when `replace_existing` is disabled.
+- Avoid renaming every object from a multi-object FBX to the same destination.
+
+### Added
+
+- Detection and compression profiles for Cavity, Gloss, Specular, Bump and Metalness maps.
+
 ## [0.2.0] - 2026-08-19
 
 ### Added

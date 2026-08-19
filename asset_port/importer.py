@@ -85,6 +85,7 @@ class AssetImporter():
         report = PipelineReport()
         file_path = Path(source_dir)
         tasks = []
+        task_records = []
         detect_group = []
         
         for file in file_path.rglob("*"):
@@ -133,17 +134,21 @@ class AssetImporter():
                     task.options = get_mesh_setting(detected_asset)
             
                 tasks.append(task) 
+                task_records.append((detected_asset, task))
             
         if not dry_run:      
             imported_objects = unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(tasks)
         
-        for asset, task in zip(detect_group, tasks):
+        for asset, task in task_records:
             imported_objs = task.get_objects()
             if not imported_objs:
                 continue
-            for obj in imported_objs:
-                current_path = obj.get_package().get_name()
-                if current_path != asset.ue_path:
+            # One source FBX can yield multiple mesh objects. The group points to
+            # the primary object; additional parts keep their Interchange names.
+            primary_object = imported_objs[0]
+            current_path = primary_object.get_package().get_name()
+            if current_path != asset.ue_path:
+                if not unreal.EditorAssetLibrary.does_asset_exist(asset.ue_path):
                     unreal.EditorAssetLibrary.rename_asset(current_path, asset.ue_path)
         group_asset = self.detector.group_assets(detect_group)
         
@@ -168,19 +173,20 @@ class AssetImporter():
         
             return group_asset, report    
             
-        total_steps = len(detect_group) + (len(group_asset) if self.config.auto_create_mi else 0)
+        total_steps = len(task_records) + (len(group_asset) if self.config.auto_create_mi else 0)
         
         with unreal.ScopedSlowTask(total_steps, tr("progress.processing")) as slow_task:
             slow_task.make_dialog(True)
                 
     
-            for asset, task in zip(detect_group, tasks):
+            for asset, task in task_records:
                 if slow_task.should_cancel():
                     break
             
                 slow_task.enter_progress_frame(1, tr("progress.texture", name=asset.base_name))
                 if asset.asset_type == AssetType.TEXTURE:
-                    imported_object = task.get_objects()
+                    loaded_asset = unreal.EditorAssetLibrary.load_asset(asset.ue_path)
+                    imported_object = [loaded_asset] if loaded_asset else task.get_objects()
                     if not imported_object:
                         continue
                     for obj in imported_object:
@@ -195,11 +201,10 @@ class AssetImporter():
                     
            
         successful_imports = 0
-        for task in tasks:
-            if len(task.get_objects()) >0:
+        for asset, task in task_records:
+            if len(task.get_objects()) > 0 or unreal.EditorAssetLibrary.does_asset_exist(asset.ue_path):
                 successful_imports += 1
-                
-            if len(task.get_objects()) ==0:
+            else:
                 report.asset_failed += 1
         
         report.asset_import = successful_imports

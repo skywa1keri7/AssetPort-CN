@@ -11,6 +11,7 @@ MATERIAL_PROPERTIES = {
     "roughness": "MP_ROUGHNESS",
     "metallic": "MP_METALLIC",
     "ambient_occlusion": "MP_AMBIENT_OCCLUSION",
+    "specular": "MP_SPECULAR",
     "emissive_color": "MP_EMISSIVE_COLOR",
     "opacity": "MP_OPACITY",
     "opacity_mask": "MP_OPACITY_MASK",
@@ -61,6 +62,9 @@ def _set_sampler_type(expression, texture, slot):
         TextureSlot.ROUGHNESS,
         TextureSlot.METALLIC,
         TextureSlot.AO,
+        TextureSlot.CAVITY,
+        TextureSlot.SPECULAR,
+        TextureSlot.GLOSS,
         TextureSlot.ORM,
         TextureSlot.RMA,
         TextureSlot.HEIGHT,
@@ -96,7 +100,12 @@ def _configure_generated_material(material, textures, blend_mode, config):
         material.set_editor_property("opacity_mask_clip_value", config.opacity_mask_clip_value)
 
     # Explicit single-channel maps win over packed maps if both are present.
-    priority = {TextureSlot.ORM: 10, TextureSlot.RMA: 10}
+    priority = {
+        TextureSlot.CAVITY: 5,
+        TextureSlot.GLOSS: 5,
+        TextureSlot.ORM: 10,
+        TextureSlot.RMA: 10,
+    }
     ordered_textures = sorted(textures, key=lambda item: priority.get(item.texture_slot, 0))
     connected_inputs = set()
     expressions = {}
@@ -232,10 +241,16 @@ def create_material_instance(group: AssetGroup, config: ImporterSettings, decisi
     """Create an MI, or a connected regular material when its master is missing."""
 
     report = MaterialBuildResult(base_name=group.base_name)
+    if not group.folder_path:
+        report.errors.append(f"Could not resolve destination folder for {group.base_name}")
+        return report
+
     mesh_object = unreal.EditorAssetLibrary.load_asset(group.mesh.ue_path) if group.mesh else None
     slots_to_process = group.material_slots if group.is_multi_material else {"": group.texture_list}
 
     for slot_name, textures in slots_to_process.items():
+        if not textures:
+            continue
         if group.is_multi_material:
             mi_name = f"MI_{group.base_name}_{slot_name}"
             package_path = f"{group.folder_path}/Materials"
