@@ -1,120 +1,147 @@
-# AssetPort
+# AssetPort-CN
 
-An automated, pipeline-friendly batch importer and organizer for **Unreal Engine 5** using Python and Editor Utility Widgets. Stop importing meshes and textures one-by-one; AssetPort automates category routing, texture settings configuration, material instance generation, and mesh linkage in a single click.
+AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 原作者认可、由社区独立维护的中文增强版。它为 Unreal Engine 5 的批量资源导入流程增加简体中文/英文双语界面，同时保持原项目的英文内部标识与资源命名逻辑，避免本地化影响导入结果。
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Unreal Engine Version](https://img.shields.io/badge/Unreal%20Engine-5.3%2B%20Supported-blue)](https://www.unrealengine.com/)
-[![Language: Python](https://img.shields.io/badge/Language-Python-green)](https://www.python.org/)
+AssetPort-CN is an independently maintained bilingual enhanced fork of [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port), created with the upstream author's approval. The original project was created by Colosyn (Shahnawaz Hussain) and is distributed under the MIT License.
 
----
-## Demo
+> 当前版本：`0.3.0`，基于上游 Asset-Port `v1.5.0`。建议先在测试工程中使用。
 
-[<img src="https://img.youtube.com/vi/Cm26pc_Ob-U/maxresdefault.jpg" width="800">](https://youtu.be/EEpK49R8tIo)
+## 当前改动
 
-## Key Features
+- 工具栏按钮和提示支持简体中文、英文。
+- 主导入窗口、预览窗口、透明材质窗口运行时本地化。
+- 分类下拉框显示本地化文本，但内部仍使用原英文分类值。
+- `Opaque`、`Masked`、`Translucent` 可显示为“不透明”“遮罩”“半透明”，材质逻辑仍接收原英文值。
+- 文件夹选择、错误对话框、进度提示、预览警告和导入报告支持双语。
+- 配置读取增加缺失字段、未知字段和损坏 JSON 的基本容错。
+- 主材质缺失时自动生成 `M_资源名_Auto` 普通材质，并连接已识别贴图。
+- 自动材质支持 BaseColor、Normal、Roughness、Metallic、AO、Emissive、Opacity、OpacityMask、ORM 和 RMA。
+- 根据贴图用途自动配置压缩方式和 sRGB；遮罩与通道打包图使用 `Masks` 并关闭 sRGB。
+- 明确识别到 OpacityMask 时自动使用 `Masked`，识别到 Opacity 时自动使用 `Translucent`。
+- 不带 `T_`/`SM_` 前缀的常见素材库文件也能按扩展名识别：图片视为纹理，FBX 默认视为静态网格。
+- 自动忽略文件名中的 `2K`、`4K` 等分辨率标记，并识别 Cavity、Gloss、Specular、Bump、Metalness。
+- 同步上游 v1.5.0 的 Atlas / 模块化套件流程：多个静态网格可共享一套贴图与材质。
+- Atlas 资源同样支持自动混合模式、缺少主材质时生成兜底材质，以及批量挂载到网格。
 
-* **📦 Smart Batch Importing**: Import meshes FBX and textures (PNG, TGA, EXR, JPG) recursively from any source folder.
-* **📂 Automated Organization**: Auto-detects asset category prefixes (e.g. `_env_`, `_wpn_`, `_prop_`) and organizes them into clean, structured subfolders inside Unreal’s Content Browser.
-* <img width="800" height="450" alt="Category" src="https://github.com/user-attachments/assets/4a80d53a-06aa-40db-a1c8-cd28c085f62b" />
+## Atlas / 模块化套件
 
-* **🎨 Automatic Material Instances (MI)**: Automatically generates Material Instances derived from a custom Master Material.
-* **🔗 Dynamic Parameter Wiring**: Detects texture suffix tags (e.g. `_N`, `_ORM`, `_Albedo`) and plugs them into the corresponding slot of the Material Instance with the correct **sRGB** and **Compression Settings** (like TC_Normalmap and TC_Masks).
-* **⚙️ ORM/Packed Map Switch**: Automatically detects Packed ORM maps and activates the material instance's `"UseORM"` static switch.
-* **🟢 Mesh Auto-Link**: Automatically assigns the newly generated Material Instance to Slot 0 of the imported Static/Skeletal Mesh.
-* **⚡ Responsive Progress Dialog**: Displays a cancellable progress bar via `unreal.ScopedSlowTask` during saves and material compilation, preventing editor hangs on large batches.
-* **👁️ Interactive Preview Mode (Dry Run)**: Run a simulation scan to view the proposed folder routing and clean asset tree in a dedicated EUW window (`EUW_AssetPort_Preview`) before performing an actual import.
-* <img width="800" height="450" alt="Preview" src="https://github.com/user-attachments/assets/a8b8d919-ffe7-41f2-bc69-1a868716cd17" />
+沿用上游 v1.5.0 的连字符命名约定：
 
-* **💎 Automated Transparency & Blend Mode Management**: Auto-detects alpha channels in Base Colour textures (PNG, TGA, EXR) and launches an interactive EUW popup (`EUW_TransparencySetup`) for artists to select Blend Modes (`Masked` vs `Translucent`). Automatically assigns `M_Master_Masked` or `M_Master_Translucent` and configures `UseBaseColourAlpha` switches.
-* <img width="800" height="450" alt="Transpareny" src="https://github.com/user-attachments/assets/b3f369c4-1f9d-419f-abf4-6c5af34c516a" />
+```text
+SM_env_Rock01-RockKit.fbx
+SM_env_Rock02-RockKit.fbx
+T_env_RockKit_D.png
+T_env_RockKit_N.png
+T_env_RockKit_ORM.png
+```
 
-* **🎭 Multi-Material Slot Detection & Subfolder Routing**: Automatically detects assets with multiple material slots (e.g., `T_Chair_Metal_D`, `T_Chair_Wood_D`). Generates per-slot Material Instances (`MI_Chair_Metal`, `MI_Chair_Wood`), links each to its corresponding static mesh slot, and routes assets into `/Materials/` and `/Textures/` subfolders. Single-material assets remain 100% flat!
-* <img width="800" height="450" alt="Multi-Material" src="https://github.com/user-attachments/assets/049b1b2d-8775-4feb-8325-50ffa05c4abd" />
+以上文件会作为一个 `RockKit` 图集资源组导入，两个网格共享同一个
+`MI_RockKit` 材质实例；如果配置的主材质不存在，则生成共享的
+`M_RockKit_Auto` 普通材质。
 
-* **🧩 UDIM & Virtual Texture Support**: Automatically detects UDIM tile sequences (`_1001` to `_1999`) and 4K Auto-VTs, routes them to dedicated Virtual Texture parameters, and displays tile counts inline in the Preview window (`[UDIM: 6 Tiles]`). 
+## 自动材质策略
 
-* **🏺 Atlas & Modular Kit Detection**: Automatically detects kit-based asset groups using hyphen delimiters (e.g. `SM_Rock01-RockKit.fbx`). Unifies all kit meshes under a flat folder (`/Game/Environment/RockKit/`), cleans asset names on import (`SM_Rock01`), shares a single Material Instance (`MI_RockKit`) across all meshes at slot 0, and badges kit summaries in the Preview UI (`[Atlas: X Meshes]`).
+导入时仍优先使用 `parent_material_opaque`、`parent_material_masked` 和
+`parent_material_translucent` 指定的主材质创建材质实例。只有当前混合模式所需的主材质不存在，且
+`auto_create_material_fallback` 为 `true` 时，才会在资源目录生成普通材质：
 
+```text
+M_资源名_Auto
+```
 
----
+单独的 Roughness、Metallic、AO 贴图优先于 ORM/RMA 中相同的通道，避免输入重复连接。
+如果用户为带 Alpha 的 BaseColor 选择了 Masked 或 Translucent，又没有单独的透明贴图，自动材质会使用 BaseColor Alpha。
 
-## Installation & Setup
-
-To install AssetPort, place the script files and assets inside your Unreal Engine project's **`Content/Python`** directory.
-
-1. **Clone or Download** this repository.
-2. In your Windows File Explorer, navigate to your Unreal project's directory and go to:
-   `YourProject/Content/Python/` (Create the `Python` folder if it doesn't exist).
-3. **Copy the following folders and files** into `YourProject/Content/Python/`:
-   * `asset_port/` (Python core pipeline)
-   * `Materials/` (Master Materials: `M_Master_Opaque`, `M_Master_Masked`, `M_Master_Translucent`)
-   * `Widgets/` (Editor Utility Widgets & Row Widgets)
-   * `importer_config.json`
-   * `init_unreal.py`
-4. **Start (or restart) Unreal Engine**. The **AssetPort** buttons will automatically load in your Content Browser's main Toolbar and Context Menu.
-
-> [!NOTE]
-> Make sure **Python Foundation Scripting** and **Editor Scripting Utilities** plugins are enabled in your Unreal Engine project settings.
-
----
-
-## How to Use
-1. Click the **AssetPort** button on the Content Browser Toolbar, or right-click anywhere in the Content Browser and select **AssetPort**.
-2. Click **Browse** and select a folder on your computer containing the meshes and textures you want to import.
-3. Select an option from the **Category Dropdown**:
-   * **Auto-Detect (Recommended)**: Auto-detects categories based on file prefixes.
-   * **Weapon/Environment/Props/Character**: Overrides detection and forces all assets into the selected category.
-4. **Choose your path**:
-   * Click **Preview**: Runs a simulation scan and opens a collapsible tree UI. If it looks correct, click **Confirm Import** at the bottom, or **Cancel** to abort.
-   * Click **Import**: Directly runs the import pipeline.
-5. When finished, you will find a report (`assetport_report.txt` or `assetport_preview_report.txt`) inside your source folder detailing the scanned, imported, and failed items.
-
----
-
-## Mappings & Naming Conventions
-
-The importer relies on simple naming tags to automate paths and slots. For a full list of prefix tags (like `sm_`, `sk_`, `t_`) and texture suffixes (like `_BaseColor`, `_N`, `_ORM`), see [CONVENTIONS.md](CONVENTIONS.md).
-
-> [!TIP]
-> **Using a Custom Master Material?**
-> If you want to use your own Master Material, see the [Custom Master Material Setup Guide in CONVENTIONS.md](CONVENTIONS.md#4-custom-master-material-setup-guide) to ensure your texture parameters and static switches match the expected naming conventions. If any names do not match, they will be ignored without breaking the import pipeline.
-
-
----
-
-## Configuration (`importer_config.json`)
-
-You can edit `importer_config.json` inside your project's `Content/Python/` folder to customize default settings:
+常用配置：
 
 ```json
 {
-    "master_opaque": "/Game/Python/Materials/M_Master_Opaque",
-    "master_masked": "/Game/Python/Materials/M_Master_Masked",
-    "master_translucent": "/Game/Python/Materials/M_Master_Translucent",
-    "auto_create_mi": true,
-    "auto_assign_to_mesh": true,
-    "replace_existing": false,
-    "organize_asset": true
+  "auto_create_mi": true,
+  "auto_create_material_fallback": true,
+  "auto_configure_textures": true,
+  "auto_assign_to_mesh": true,
+  "opacity_mask_clip_value": 0.333
 }
 ```
 
-* **`master_opaque` / `master_masked` / `master_translucent`**: Paths to your Master Materials. By default, they point to the included materials under `/Game/Python/Materials/`.
-* **`auto_create_mi`**: Automatically generate a Material Instance for textures.
-* **`auto_assign_to_mesh`**: Link the created Material Instance to the imported mesh.
-* **`replace_existing`**: If true, overwrites any existing Material Instances with the same name.
+- `auto_create_mi`：启用整个自动材质构建步骤（包括实例和兜底普通材质）。
+- `auto_create_material_fallback`：缺少主材质时生成普通材质；关闭后会在报告中记录错误。
+- `auto_configure_textures`：自动设置贴图压缩方式和 sRGB。
+- `opacity_mask_clip_value`：Masked 材质的裁剪阈值，配置读取时限制在 0～1。
 
----
-## Documentation
-* [View Changelog](CHANGELOG.md)
+## 安装
 
-## License
+本项目目前沿用上游的 Content/Python 安装方式，不是标准 `.uplugin` 插件。
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+1. 在 Unreal Engine 项目中启用：
+   - Python Editor Script Plugin
+   - Editor Scripting Utilities
+2. 将本仓库以下内容复制到项目的 `Content/Python/`：
+   - `asset_port/`
+   - `Materials/`
+   - `Widgets/`
+   - `importer_config.json`
+   - `init_unreal.py`
+3. 重启 Unreal Editor。
 
-## Roadmap
+不要把外层 `AssetPort-CN` 文件夹整体放进 `Content/Python`，应复制它里面的内容。
 
-Feature planning and upcoming development tracked on the [Project Board](https://github.com/Colosyn/Asset-Port/projects).
+## 切换语言
 
-## Contributing
+编辑 `importer_config.json`：
 
-Have a feature idea or naming convention to propose? Join the conversation in [Discussions](https://github.com/Colosyn/Asset-Port/discussions).
+```json
+{
+  "language": "zh_CN"
+}
+```
+
+支持的值：
+
+- `zh_CN`：简体中文
+- `en_US`：英文
+
+修改后关闭并重新打开 AssetPort 窗口。工具栏名称需要刷新菜单或重启编辑器后更新。
+
+## 双语实现原则
+
+界面只翻译显示文本，以下内部值保持英文：
+
+- 分类路径：`Environment`、`Weapons`、`Props`、`Characters`
+- 混合模式：`Opaque`、`Masked`、`Translucent`
+- 资源前后缀及材质参数名
+- Unreal 资源路径
+
+这样中文界面不会改变原项目的路由、材质和命名行为。
+
+## 已知限制
+
+- Editor Utility Widget 的固定文字通过 Python 在窗口生成后替换；如果上游重命名控件，需要同步更新 `asset_port/ui_localization.py`。
+- 当前语言通过 JSON 配置切换，窗口内语言选择器将在后续版本加入。
+- 上游 Widget 资源位于 `/Game/Python/Widgets`，当前版本仍依赖该安装路径。
+- 自动生成材质目前连接常用 PBR 输入；Height 只会配置为 Masks，不会擅自连接位移。
+- 无前缀 FBX 默认按静态网格导入；骨骼网格仍建议使用 `SK_` 前缀明确标识。
+
+## 上游与许可证
+
+本项目基于 AssetPort 修改：
+
+- 原项目：https://github.com/Colosyn/Asset-Port
+- 原作者：Colosyn（Shahnawaz Hussain）
+- 原许可证：MIT License
+
+原项目版权声明和 MIT 许可证全文保留在 [LICENSE](LICENSE) 中。
+更完整的来源与修改声明见 [NOTICE](NOTICE)。
+
+## 开发计划
+
+- [x] Python 菜单、对话框和提示双语化
+- [x] 主窗口、预览窗口、透明材质窗口运行时双语化
+- [x] 分类与混合模式显示值/内部值分离
+- [x] 缺少主材质时生成基础 PBR 材质
+- [x] 按贴图用途自动设置压缩与 sRGB
+- [x] 兼容上游 v1.5.0 Atlas / 模块化套件管线
+- [ ] 在主窗口中增加语言切换控件
+- [ ] 增加可视化设置面板
+- [ ] 扩展 UDIM、EXR Alpha 和重复事件绑定的跨版本测试
+- [ ] 封装为标准 Unreal Engine 插件

@@ -1,4 +1,7 @@
 __pycache__/
-*.pyc
-.vs/
-.vscode/
+*.py[cod]
+*.log
+.DS_Store
+Thumbs.db
+assetport_report.txt
+assetport_preview_report.txt

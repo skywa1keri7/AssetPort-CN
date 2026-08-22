@@ -1,5 +1,6 @@
 import unreal
 from asset_port.models import DetectedAsset, AssetType, TextureSlot
+from asset_port.material_rules import texture_profile
 
 def get_mesh_setting(asset: DetectedAsset):
     
@@ -28,37 +29,17 @@ def get_mesh_setting(asset: DetectedAsset):
 
 
 def texture_settings(texture_asset, slot: TextureSlot):
-    
+    profile = texture_profile(slot)
+    if profile is None:
+        return False
 
-    if slot in (TextureSlot.BASE_COLOUR, TextureSlot.EMISSIVE):
-        texture_asset.srgb = True
-        
-        texture_asset.compression_settings =unreal.TextureCompressionSettings.TC_DEFAULT
-        
-    if slot == TextureSlot.NORMAL:
-        texture_asset.srgb = False
-        texture_asset.compression_settings =unreal.TextureCompressionSettings.TC_NORMALMAP
-        
-        
-    if slot in (
-        TextureSlot.ROUGHNESS,
-        TextureSlot.METALLIC,
-        TextureSlot.AO,
-        TextureSlot.CAVITY,
-        TextureSlot.SPECULAR,
-        TextureSlot.GLOSS,
-        TextureSlot.ORM,
-        TextureSlot.RMA,
-        TextureSlot.HEIGHT,
-        TextureSlot.OPACITY_MASK,
-    ):
-        texture_asset.srgb = False
-        texture_asset.compression_settings =unreal.TextureCompressionSettings.TC_MASKS
-        
-    if slot == TextureSlot.OPACITY:
-        texture_asset.srgb = False
-        texture_asset.compression_settings =unreal.TextureCompressionSettings.TC_ALPHA
-
-    if slot == TextureSlot.TRANSLUCENCY:
-        texture_asset.srgb = True
-        texture_asset.compression_settings =unreal.TextureCompressionSettings.TC_DEFAULT
+    compression_name, srgb = profile
+    compression_values = {
+        "default": unreal.TextureCompressionSettings.TC_DEFAULT,
+        "normal": unreal.TextureCompressionSettings.TC_NORMALMAP,
+        "masks": unreal.TextureCompressionSettings.TC_MASKS,
+        "alpha": unreal.TextureCompressionSettings.TC_ALPHA,
+    }
+    texture_asset.set_editor_property("srgb", srgb)
+    texture_asset.set_editor_property("compression_settings", compression_values[compression_name])
+    return True

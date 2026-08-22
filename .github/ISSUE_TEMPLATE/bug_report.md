@@ -1,37 +1,43 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: "[BUG]"
+name: Bug report / 问题反馈
+about: Report an AssetPort-CN problem / 反馈 AssetPort-CN 使用问题
+title: "[BUG] "
 labels: bug
 assignees: ''
-
 ---
 
-**UE Version**
-e.g. UE 5.6
+## UE Version / UE 版本
 
-**OS**
-e.g. Windows 11
+Example / 示例：UE 5.6
 
-**Describe the bug**
-A clear description of what the bug is.
+## OS / 操作系统
 
-**Steps to Reproduce**
-1. 
-2. 
-3. 
+Example / 示例：Windows 11
 
-**Expected behavior**
-What you expected to happen.
+## Description / 问题描述
 
-**Actual behavior**
-What actually happened.
+Describe what happened and what you expected to happen.
 
-**Error message**
-Paste any error from the Output Log here.
+请说明实际发生的情况以及预期结果。
 
-**Asset names used**
-e.g. SM_Prop_Chair, T_Prop_Chair_B — helps reproduce naming issues.
+## Steps to reproduce / 复现步骤
 
-**Additional context**
-Anything else that might help.
+1.
+2.
+3.
+
+## Error message / 错误信息
+
+Paste relevant Unreal Output Log entries here.
+
+请粘贴 Unreal 输出日志中的相关内容。
+
+## Asset names / 素材文件名
+
+Example / 示例：`RockCliff_2K_BaseColor.png`, `RockCliff.fbx`
+
+## Additional context / 补充信息
+
+Include screenshots or a minimal sample filename list when possible.
+
+如有条件，请附截图或最小化的素材文件名列表。

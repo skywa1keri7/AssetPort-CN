@@ -1,4 +1,5 @@
 import unreal
+from asset_port.localization import tr
 
 def get_minor_version():
     v = unreal.SystemLibrary.get_engine_version()
@@ -13,8 +14,8 @@ def register_asset_port():
             name="AssetPortImportButton",
             type=unreal.MultiBlockType.TOOL_BAR_BUTTON
         )
-        entry.set_label("AssetPort")
-        entry.set_tool_tip("Import Folder using AssetPort automated pipeline")
+        entry.set_label(tr("app.name"))
+        entry.set_tool_tip(tr("menu.tooltip"))
         entry.set_string_command(
             unreal.ToolMenuStringCommandType.PYTHON,
             "AssetPort",
@@ -33,8 +34,8 @@ def register_asset_port():
             name="AssetPortContextMenu",
             type=unreal.MultiBlockType.MENU_ENTRY
         )
-        entry.set_label("AssetPort")
-        entry.set_tool_tip("Import Folder using AssetPort automated pipeline")
+        entry.set_label(tr("app.name"))
+        entry.set_tool_tip(tr("menu.tooltip"))
         entry.set_string_command(
             unreal.ToolMenuStringCommandType.PYTHON,
             "AssetPort",

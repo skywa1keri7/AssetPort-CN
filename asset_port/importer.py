@@ -6,7 +6,8 @@ from asset_port.presets import get_mesh_setting, texture_settings
 from asset_port.models import AssetType, PipelineReport, TextureSlot, AtlasGroup
 from asset_port.Validator import asset_validator, group_validator, atlas_group_validator
 from asset_port.config import config_loader
-from asset_port.materials import create_material_instance,create_atlas_material_instance
+from asset_port.materials import create_material_instance, create_atlas_material_instance
+from asset_port.localization import tr
 
 def check_source_has_alpha(file_path):
     if not file_path:
@@ -44,9 +45,9 @@ def check_source_has_alpha(file_path):
                 if data[pos:pos+7] != b"chlist\x00":
                     return False
                 pos +=7
-                size = int.from_bytes(data[pos:pos+7], "little")
+                size = int.from_bytes(data[pos:pos+4], "little")
                 pos += 4
-                end = pos = size
+                end = pos + size
                 while pos < end:
                     name_end = data.find(b"\x00", pos)
                     if name_end == -1 or name_end == pos:
@@ -69,6 +70,8 @@ class AssetImporter():
         self.config = config_loader()
         
     def build_materials(self, group_asset, decisions=None, report= None):
+        if not self.config.auto_create_mi:
+            return
         for group in group_asset:
             if isinstance(group, AtlasGroup):
                 mi_report = create_atlas_material_instance(group, self.config, decisions)
@@ -78,6 +81,8 @@ class AssetImporter():
                 report.mis_created += 1
                 if mi_report.mesh_linked:
                     report.mis_linked += 1
+            if report and mi_report.errors:
+                report.errors.extend(mi_report.errors)
         
     def import_directory(self, source_dir, category, dry_run = False):
         report = PipelineReport()
@@ -148,7 +153,7 @@ class AssetImporter():
             atlas_warnings = atlas_group_validator(atlas_group)
             if atlas_warnings:
                 report.warnings.extend(atlas_warnings)
-                    
+
         for group in group_asset:
             assets_in_group = group.texture_list.copy()
             if group.mesh:
@@ -188,16 +193,22 @@ class AssetImporter():
         
         if not dry_run:   
             unreal_tasks = [t for a, t in task_pairs]   
-            imported_objects = unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(unreal_tasks)
+            unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(unreal_tasks)
                             
             for asset, task in task_pairs:
                 imported_objs = task.get_objects()
                 if not imported_objs:
                     continue
-                for obj in imported_objs:
-                    current_path = obj.get_package().get_name()
-                    if current_path != asset.ue_path:
-                        unreal.EditorAssetLibrary.rename_asset(current_path, asset.ue_path)
+                # A single FBX can produce multiple objects. Only the primary
+                # object maps to the detected asset path; additional parts keep
+                # their Interchange-generated names.
+                primary_object = imported_objs[0]
+                current_path = primary_object.get_package().get_name()
+                if (
+                    current_path != asset.ue_path
+                    and not unreal.EditorAssetLibrary.does_asset_exist(asset.ue_path)
+                ):
+                    unreal.EditorAssetLibrary.rename_asset(current_path, asset.ue_path)
             
         
         report.groups_found = len(group_asset) + len(atlas_groups)
@@ -211,9 +222,9 @@ class AssetImporter():
         
             return all_group, report    
             
-        total_steps = len(detect_group) + (len(all_group) if self.config.auto_create_mi else 0)
+        total_steps = len(task_pairs) + (len(all_group) if self.config.auto_create_mi else 0)
         
-        with unreal.ScopedSlowTask(total_steps, "Processing Imported assets...") as slow_task:
+        with unreal.ScopedSlowTask(total_steps, tr("progress.processing")) as slow_task:
             slow_task.make_dialog(True)
                 
     
@@ -221,26 +232,29 @@ class AssetImporter():
                 if slow_task.should_cancel():
                     break
             
-                slow_task.enter_progress_frame(1, f"Configuring textures: {asset.base_name}")
+                slow_task.enter_progress_frame(1, tr("progress.texture", name=asset.base_name))
                 if asset.asset_type == AssetType.TEXTURE:
-                    imported_object = task.get_objects()
+                    loaded_asset = unreal.EditorAssetLibrary.load_asset(asset.ue_path)
+                    imported_object = [loaded_asset] if loaded_asset else task.get_objects()
                     if not imported_object:
                         continue
                     for obj in imported_object:
-                        texture_settings(obj, asset.texture_slot)
+                        if self.config.auto_configure_textures:
+                            texture_settings(obj, asset.texture_slot)
                         
                         if asset.texture_slot == TextureSlot.BASE_COLOUR:
                             asset.has_alpha = check_source_has_alpha(asset.source_path)
                             unreal.log(f"AssetPort: BaseColour {asset.base_name} has_alpha -> {asset.has_alpha}")
+
+                        unreal.EditorAssetLibrary.save_loaded_asset(obj)
                     
         successful_imports = 0
         for asset, task in task_pairs:
-            if len(task.get_objects()) >0:
+            if len(task.get_objects()) > 0 or unreal.EditorAssetLibrary.does_asset_exist(asset.ue_path):
                 successful_imports += 1
-                
-            if len(task.get_objects()) ==0:
+            else:
                 report.asset_failed += 1
         
         report.asset_import = successful_imports
         
-        return all_group, report 
+        return all_group, report

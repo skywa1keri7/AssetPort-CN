@@ -91,6 +91,8 @@ class ImportResult:
 class MaterialBuildResult:
     base_name : str   
     mi_path : Optional[str] = None
+    material_path : Optional[str] = None
+    used_fallback_material : bool = False
     texture_assigned : dict[str, str] = field(default_factory=dict)
     mesh_linked : Optional[str] = None
     success : bool = False

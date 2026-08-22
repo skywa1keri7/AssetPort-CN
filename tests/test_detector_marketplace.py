@@ -22,6 +22,29 @@ class MarketplaceFilenameTests(unittest.TestCase):
         self.assertEqual(asset.asset_type, AssetType.STATIC_MESH)
         self.assertEqual(asset.base_name, "RockCliff")
 
+    def test_prefixless_atlas_fbx_gets_static_mesh_asset_name(self):
+        asset = self.detector.detect_file("Rock01-RockKit.fbx")
+
+        self.assertEqual(asset.asset_type, AssetType.STATIC_MESH)
+        self.assertEqual(asset.kit_name, "RockKit")
+        self.assertEqual(asset.ue_asset_name, "SM_Rock01")
+
+    def test_atlas_group_keeps_shared_texture_set(self):
+        assets = [
+            self.detector.detect_file("SM_env_Rock01-RockKit.fbx"),
+            self.detector.detect_file("SM_env_Rock02-RockKit.fbx"),
+            self.detector.detect_file("T_env_RockKit_D.png"),
+            self.detector.detect_file("T_env_RockKit_N.png"),
+        ]
+
+        atlas_groups, remaining = self.detector.group_atlas_assets(assets)
+
+        self.assertEqual(remaining, [])
+        self.assertEqual(len(atlas_groups), 1)
+        self.assertEqual(atlas_groups[0].kit_name, "RockKit")
+        self.assertEqual(atlas_groups[0].mesh_count, 2)
+        self.assertEqual(len(atlas_groups[0].texture_list), 2)
+
     def test_additional_marketplace_suffixes(self):
         expected = {
             "Metalness": TextureSlot.METALLIC,

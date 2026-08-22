@@ -5,6 +5,12 @@ from asset_port.importer import AssetImporter
 from asset_port.logger import log_pipeline_report
 from asset_port.config import config_loader
 from asset_port.models import TextureSlot, AtlasGroup, AssetGroup
+from asset_port.localization import category_to_internal, blend_to_internal, localize_message, tr
+from asset_port.ui_localization import (
+    localize_main_widget,
+    localize_preview_widget,
+    localize_transparency_widget,
+)
 active_widget = None
 preview_widget = None
 last_folder_path = ""
@@ -62,6 +68,7 @@ def show_transparency_popup(items, on_confirm_callback):
         transparency_widget.set_editor_property("MaterialNames", name)
         transparency_widget.set_editor_property("DefaultModes", default)
         transparency_widget.call_method("PopulateTransparencyList")
+        localize_transparency_widget(transparency_widget)
         
         confirm_btn = transparency_widget.get_editor_property("Confirm_Button")
         cancel_btn = transparency_widget.get_editor_property("Cancel_Button")
@@ -88,7 +95,7 @@ def on_popup_confirm(items, on_confirm_callback):
                 try:
                     combo = row.get_editor_property("ComboBox_BlendMode")
                     if combo:
-                        selected_mode = combo.get_selected_option()
+                        selected_mode = blend_to_internal(combo.get_selected_option())
                         decisions[mi_name] =  selected_mode
                         unreal.log(f"AssetPort: Set {mi_name} blend mode -> {selected_mode}")
                     else:
@@ -141,6 +148,7 @@ def run_importer():
     if widget_blueprint:
         active_widget = subsystem.spawn_and_register_tab(widget_blueprint)
         if active_widget:
+            localize_main_widget(active_widget)
             
         
             browse_button = active_widget.get_editor_property("Browse_Button")
@@ -159,7 +167,7 @@ def on_browse_clicked():
     root = tk.Tk()
     root.withdraw()
     root.attributes("-topmost", True)
-    folder_path = filedialog.askdirectory(title="Select Import Folder")
+    folder_path = filedialog.askdirectory(title=tr("folder.dialog_title"))
     root.destroy()
     
     if folder_path:
@@ -176,7 +184,7 @@ def on_import_clicked():
     
     category_dropdown = active_widget.get_editor_property("Category_Dropdown")
     category_str = category_dropdown.get_selected_option()
-    category = None if category_str in ("None", "Auto-Detect") else category_str
+    category = category_to_internal(category_str)
     
     if folder_path:
         execute_import_pipeline(folder_path, category)
@@ -207,14 +215,14 @@ def on_preview_clicked():
     
     if not folder_path:
         unreal.EditorDialog.show_message(
-            "Select Directory",
-            "Please select a valid import directory before launching the preview.",
+            tr("dialog.select_directory.title"),
+            tr("dialog.select_directory.body"),
             unreal.AppMsgType.OK
         )
         return
     category_dropdown = active_widget.get_editor_property("Category_Dropdown")
     category_str = category_dropdown.get_selected_option()
-    category = None if category_str in ("None", "Auto-Detect") else category_str
+    category = category_to_internal(category_str)
     
     import_asset_name =[]
     failed_asset_name =[]
@@ -240,7 +248,10 @@ def on_preview_clicked():
             if display_folder.startswith("/Game/"):
                 display_folder = display_folder[6:]
             if isinstance(group, AtlasGroup):
-                display_folder = f"{display_folder}  [Atlas: {group.mesh_count} Meshes]"  
+                display_folder = (
+                    f"{display_folder}  "
+                    f"[{tr('preview.atlas', count=group.mesh_count)}]"
+                )
             if isinstance(group, AssetGroup) and  group.mesh is not None:
                 mesh_name = group.mesh.ue_path.split("/")[-1]
                 import_asset_name.append(f"{display_folder}|{mesh_name}")
@@ -268,10 +279,10 @@ def on_preview_clicked():
                     import_asset_name.append(f"{display_folder}|MI_{group.base_name}")   
                 
         for warning in report.warnings:
-            failed_asset_name.append(warning)
+            failed_asset_name.append(localize_message(warning))
             
         for error in report.errors:
-            failed_asset_name.append(error)
+            failed_asset_name.append(localize_message(error))
            
     if widget_blueprint:
         preview_widget = subsystem.spawn_and_register_tab(widget_blueprint)
@@ -287,6 +298,7 @@ def on_preview_clicked():
         preview_widget.set_editor_property("Import_List_Items", import_asset_name)
         preview_widget.set_editor_property("Failed_List_Items", failed_asset_name)
         preview_widget.call_method("RefreshPreviewUI")
+        localize_preview_widget(preview_widget)
         
         on_cancel_clicked()
         
