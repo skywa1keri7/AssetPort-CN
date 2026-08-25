@@ -3,7 +3,9 @@
 ## Unreleased — 0.4.1-dev
 
 - Added bilingual Chinese/English parameter-group headers to all four bundled master materials.
-- Preserved stable English parameter identifiers used by automatic material binding and custom integrations.
+- Added bilingual Chinese/English labels for the individual texture, scalar, vector, and switch parameters.
+- Added bilingual/legacy parameter alias resolution so older English custom master materials remain compatible.
+- Added a safe migration path for existing material-instance overrides when bundled master parameters are renamed.
 - Corrected the artist-facing `Metalic` and `Speculer` group-label spellings.
 
 ## [0.4.0] - 2026-08-25

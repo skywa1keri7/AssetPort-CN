@@ -1,6 +1,8 @@
-"""Verify that bilingual master-material edits preserve binding identifiers."""
+"""Verify bundled bilingual identifiers and legacy alias resolution."""
 
 import unreal
+
+from asset_port.material_parameters import bilingual_parameter_name
 
 
 material_paths = (
@@ -9,8 +11,10 @@ material_paths = (
     "/Game/Python/Materials/M_Master_Translucent",
     "/Game/Python/Materials/M_Master_Decal",
 )
-required_textures = {"BaseColour", "Normal", "Roughness"}
-required_switches = {"UseORM", "UseVT"}
+required_textures = {
+    bilingual_parameter_name(name) for name in ("BaseColour", "Normal", "Roughness")
+}
+required_switches = {bilingual_parameter_name(name) for name in ("UseORM", "UseVT")}
 editing = unreal.MaterialEditingLibrary
 
 for path in material_paths:

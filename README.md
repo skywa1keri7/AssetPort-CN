@@ -24,7 +24,7 @@ AssetPort-CN is an independently maintained bilingual UE5 fork of [Colosyn/Asset
 - 识别 `skm_`、`anim_`、`_alb`、`_arm` 等 Fab/Marketplace 别名。
 - 透明材质弹窗新增“贴花”选项，可创建 Deferred Decal 材质。
 - 支持 FBX 内嵌 LOD，以及单独导出的 `_LOD0/_LOD1/...` 静态网格文件。
-- 内置母材质图加入中英双语参数组标题和说明区；英文参数名作为自动绑定接口继续保留。
+- 内置母材质图、材质实例参数组与具体参数名均采用“中文 / English”双语显示。
 
 ### Decal / 贴花材质
 
@@ -76,7 +76,7 @@ T_env_RockKit_ORM.png
 
 缺少相应母材质且 `auto_create_material_fallback` 为 `true` 时生成 `M_资源名_Auto`。单独的 Roughness、Metallic、AO 贴图优先于 ORM/RMA 中的对应通道。为带 Alpha 的 BaseColor 选择 Masked、Translucent 或 Decal 且没有单独透明贴图时，会使用 BaseColor Alpha。
 
-材质实例中的参数组标题采用“中文 / English”双语形式。母材质图中的中文说明和双语组标题不会重命名 `BaseColour`、`Normal`、`UseORM` 等英文参数，因为这些名称是插件与自定义母材质之间的稳定接口。
+材质实例中的参数组标题和具体参数名均采用“中文 / English”双语形式。导入器会自动识别新版双语参数，同时保留 `BaseColour`、`Normal`、`UseORM` 等旧英文别名，因此使用旧版英文参数的自定义母材质仍然兼容。升级已有工程时，应在关闭常规 UE Editor 后通过 UE Python 运行 [`tools/localize_material_parameters_unreal.py`](tools/localize_material_parameters_unreal.py) 一次，将既有材质实例中的参数覆盖安全迁移到双语名称；操作前仍建议备份工程。
 
 ### 配置
 
@@ -131,7 +131,7 @@ T_env_RockKit_ORM.png
 - Atlas/modular-kit workflow with one shared material across multiple meshes.
 - A `Decal` choice in the transparency dialog, backed by a Deferred Decal master material.
 - Embedded FBX LOD import and separately exported `_LOD0/_LOD1/...` Static Mesh files.
-- Bilingual parameter-group headers and graph legends in all bundled master materials while stable English parameter identifiers remain unchanged.
+- Bilingual Chinese/English graph legends, parameter groups, and individual parameter labels in all bundled master materials, with legacy English aliases retained for custom-master compatibility.
 
 ### Decal materials
 
@@ -147,7 +147,7 @@ Separate-file LOD attachment currently targets Static Mesh assets. Skeletal Mesh
 
 AssetPort-CN first tries the configured Opaque, Masked, Translucent, or Decal master. If it is unavailable and fallback generation is enabled, it creates `M_<Asset>_Auto` and wires recognized PBR inputs. Dedicated Roughness, Metallic, and AO textures take priority over matching ORM/RMA channels. Base Color alpha is used for Masked, Translucent, or Decal when no dedicated opacity texture exists.
 
-Material Instance group headers and master-material graph legends are bilingual. Identifiers such as `BaseColour`, `Normal`, and `UseORM` remain English because they form the stable binding API for bundled and custom master materials.
+Material Instance group headers and individual parameters, plus the master-material graph legends, are bilingual. The importer resolves the new bilingual names first and falls back to legacy identifiers such as `BaseColour`, `Normal`, and `UseORM`, so existing English custom masters remain compatible. When upgrading an existing project, close the regular UE Editor and run [`tools/localize_material_parameters_unreal.py`](tools/localize_material_parameters_unreal.py) once through UE Python so stored Material Instance overrides follow the renamed bundled parameters; back up the project first.
 
 ### Configuration and installation
 

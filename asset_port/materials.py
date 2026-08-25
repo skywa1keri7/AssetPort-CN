@@ -2,6 +2,7 @@ import unreal
 
 from asset_port.config import ImporterSettings
 from asset_port.material_rules import automatic_blend_mode, material_connections
+from asset_port.material_parameters import resolve_parameter_name
 from asset_port.models import AssetGroup, AtlasGroup, MaterialBuildResult, TextureSlot
 
 
@@ -243,14 +244,22 @@ def _create_material_instance(mi_name, mi_package, textures, blend_mode, parent_
         return None, mi_path, {}
 
     mi.set_editor_property("parent", parent_material)
+    editing = unreal.MaterialEditingLibrary
+    texture_parameter_names = editing.get_texture_parameter_names(parent_material)
+    switch_parameter_names = editing.get_static_switch_parameter_names(parent_material)
+
+    def set_switch(legacy_name, value):
+        parameter_name = resolve_parameter_name(legacy_name, switch_parameter_names)
+        editing.set_material_instance_static_switch_parameter_value(
+            mi, parameter_name, value=value
+        )
+
     if blend_mode in ("Masked", "Translucent", "Decal"):
         base_color = next(
             (texture for texture in textures if texture.texture_slot == TextureSlot.BASE_COLOUR),
             None,
         )
-        unreal.MaterialEditingLibrary.set_material_instance_static_switch_parameter_value(
-            mi, "UseBaseColourAlpha", value=bool(base_color and base_color.has_alpha)
-        )
+        set_switch("UseBaseColourAlpha", bool(base_color and base_color.has_alpha))
 
     loaded_textures = []
     has_vt = False
@@ -262,9 +271,7 @@ def _create_material_instance(mi_name, mi_package, textures, blend_mode, parent_
             loaded_textures.append((texture, texture_object))
             has_vt = has_vt or bool(texture_object.get_editor_property("virtual_texture_streaming"))
 
-    unreal.MaterialEditingLibrary.set_material_instance_static_switch_parameter_value(
-        mi, "UseVT", value=has_vt
-    )
+    set_switch("UseVT", has_vt)
 
     assigned = {}
     for texture, texture_object in loaded_textures:
@@ -275,14 +282,13 @@ def _create_material_instance(mi_name, mi_package, textures, blend_mode, parent_
         param_name = texture.texture_slot.value
         if has_vt:
             param_name = f"{param_name}_VT"
-        unreal.MaterialEditingLibrary.set_material_instance_texture_parameter_value(
-            mi, param_name, texture_object
+        resolved_param_name = resolve_parameter_name(param_name, texture_parameter_names)
+        editing.set_material_instance_texture_parameter_value(
+            mi, resolved_param_name, texture_object
         )
         if texture.texture_slot == TextureSlot.ORM:
-            unreal.MaterialEditingLibrary.set_material_instance_static_switch_parameter_value(
-                mi, "UseORM", value=True
-            )
-        assigned[param_name] = texture.ue_path
+            set_switch("UseORM", True)
+        assigned[resolved_param_name] = texture.ue_path
 
     unreal.EditorAssetLibrary.save_loaded_asset(mi)
     return mi, mi_path, assigned
