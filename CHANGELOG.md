@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 0.4.2-dev
+## [0.4.2] - 2026-08-25
 
 - Fixed dedicated `_Opacity` textures not binding to the bundled Decal master's `OpacityMask` parameter while preserving custom masters that expose `Opacity` directly.
 
