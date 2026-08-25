@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — 0.4.1-dev
+
+- Added bilingual Chinese/English parameter-group headers to all four bundled master materials.
+- Preserved stable English parameter identifiers used by automatic material binding and custom integrations.
+- Corrected the artist-facing `Metalic` and `Speculer` group-label spellings.
+
 ## [0.4.0] - 2026-08-25
 
 - Incorporated upstream v1.5.2 category inheritance and Atlas category resolution.
