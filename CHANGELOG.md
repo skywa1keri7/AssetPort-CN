@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 0.4.0-dev
+## [0.4.0] - 2026-08-25
 
 - Incorporated upstream v1.5.2 category inheritance and Atlas category resolution.
 - Added Vehicles/Effects categories and localized UI choices.

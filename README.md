@@ -6,7 +6,7 @@ AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 原
 
 AssetPort-CN is an independently maintained bilingual UE5 fork of [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port), created with the upstream author's approval. It preserves the upstream English identifiers and MIT License while adding artist-oriented material, texture, Atlas, Decal, and LOD workflows.
 
-> 开发版本 / Development version: `0.4.0-dev`，已吸收 / incorporates Asset-Port `v1.5.2` improvements. 当前修改尚未发布，请先在测试工程中使用。These changes are not released yet; test them in a non-production project first.
+> 当前版本 / Current version: `0.4.0`，已吸收 / incorporates Asset-Port `v1.5.2` improvements. 建议先在测试工程或项目副本中验证生产素材。Test production assets in a sample project or project copy first.
 
 ---
 
