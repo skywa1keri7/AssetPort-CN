@@ -107,7 +107,7 @@ class LocalizationTests(unittest.TestCase):
         self.assertEqual([category_to_internal(value, "en_US") for value in category_options("en_US")], expected)
 
     def test_blend_round_trip(self):
-        expected = ["Masked", "Translucent", "Opaque"]
+        expected = ["Masked", "Translucent", "Decal", "Opaque"]
         self.assertEqual([blend_to_internal(value, "zh_CN") for value in blend_options("zh_CN")], expected)
         self.assertEqual([blend_to_internal(value, "en_US") for value in blend_options("en_US")], expected)
 

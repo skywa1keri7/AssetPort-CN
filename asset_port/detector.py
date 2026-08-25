@@ -91,6 +91,16 @@ class AssetDetector:
         
         path_obj = Path(file_path)
         stem = path_obj.stem
+
+        # Separate FBX files exported as ``Mesh_LOD0.fbx``, ``Mesh_LOD1.fbx``
+        # share one asset group. Strip the marker before the normal naming
+        # parser so it cannot be mistaken for a material-slot token.
+        lod_index = None
+        if path_obj.suffix.lower() == ".fbx":
+            lod_match = re.search(r"_LOD(?P<index>\d+)$", stem, re.IGNORECASE)
+            if lod_match:
+                lod_index = int(lod_match.group("index"))
+                stem = stem[:lod_match.start()]
         
         udim_tile = None
         udim_match = re.search(r"_(1[0-9]{3})$", stem)
@@ -112,7 +122,8 @@ class AssetDetector:
                 texture_slot=None,
                 extension=path_obj.suffix,
                 category=None,
-                material_slot_name=None
+                material_slot_name=None,
+                lod_index=lod_index,
             )
         
         group = match.groupdict()
@@ -176,7 +187,8 @@ class AssetDetector:
             material_slot_name=material_slot_name,
             udim_tile=udim_tile,
             kit_name=kit_name,
-            ue_asset_name=ue_asset_name
+            ue_asset_name=ue_asset_name,
+            lod_index=lod_index,
         )
         
 
@@ -225,7 +237,13 @@ class AssetDetector:
                     group.material_slots[asset.material_slot_name].append(asset)
                 
             elif asset.asset_type in (AssetType.SKELETAL_MESH, AssetType.STATIC_MESH):
-                group.mesh = asset
+                if asset.lod_index in (None, 0):
+                    # Prefer the unsuffixed base mesh when both it and LOD0
+                    # exist; exporters should normally provide one or the other.
+                    if group.mesh is None or group.mesh.lod_index == 0:
+                        group.mesh = asset
+                else:
+                    group.lod_meshes.append(asset)
                 
             
             if asset.category:
@@ -238,8 +256,12 @@ class AssetDetector:
         
         kit_meshes ={}
         
+        atlas_lods = {}
         for asset in assets:
-            if asset.kit_name:
+            if asset.kit_name and asset.lod_index not in (None, 0):
+                mesh_key = asset.ue_asset_name or asset.base_name
+                atlas_lods.setdefault(asset.kit_name, {}).setdefault(mesh_key, []).append(asset)
+            elif asset.kit_name:
                 if asset.kit_name not in kit_meshes:
                     kit_meshes[asset.kit_name] = []
                 kit_meshes[asset.kit_name].append(asset)
@@ -271,6 +293,7 @@ class AssetDetector:
                 mesh_list=meshes,
                 texture_list=kit_textures.get(kit_name,[]),
                 category=meshes[0].category,
+                lod_meshes=atlas_lods.get(kit_name, {}),
             )
             atlas_group.append(group)
             

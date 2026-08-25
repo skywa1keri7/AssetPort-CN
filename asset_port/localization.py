@@ -27,6 +27,7 @@ TRANSLATIONS = {
         "preview.confirm": "Confirm Import",
         "preview.failed": "Failed / Warnings",
         "preview.atlas": "Atlas: {count} Meshes",
+        "preview.lods": "LODs: {indices}",
         "transparency.title": "Asset Port - Transparency Setup",
         "transparency.help": "Select the desired Blend Mode for detected transparent assets:",
         "common.confirm": "Confirm Import",
@@ -39,16 +40,19 @@ TRANSLATIONS = {
         "blend.opaque": "Opaque",
         "blend.masked": "Masked",
         "blend.translucent": "Translucent",
+        "blend.decal": "Decal",
         "report.scanned": "Scanned",
         "report.imported": "Imported",
         "report.mi_created": "Materials Created",
         "report.mi_linked": "Materials Linked",
         "report.atlas_groups": "Atlas Groups",
         "report.atlas_meshes": "Atlas Meshes Imported",
+        "report.lods": "LODs Imported",
         "report.warning": "Warning",
         "report.error": "Error",
         "progress.processing": "Processing imported assets...",
         "progress.texture": "Configuring textures: {name}",
+        "progress.lod": "Importing LOD{index}: {name}",
     },
     "zh_CN": {
         "app.name": "AssetPort 资源导入",
@@ -68,6 +72,7 @@ TRANSLATIONS = {
         "preview.confirm": "确认导入",
         "preview.failed": "失败与警告",
         "preview.atlas": "图集：{count} 个模型",
+        "preview.lods": "LOD：{indices}",
         "transparency.title": "AssetPort - 透明材质设置",
         "transparency.help": "请为检测到的透明材质选择混合模式：",
         "common.confirm": "确认导入",
@@ -80,16 +85,19 @@ TRANSLATIONS = {
         "blend.opaque": "不透明",
         "blend.masked": "遮罩",
         "blend.translucent": "半透明",
+        "blend.decal": "贴花",
         "report.scanned": "扫描数量",
         "report.imported": "成功导入",
         "report.mi_created": "创建材质",
         "report.mi_linked": "关联材质",
         "report.atlas_groups": "图集资源组",
         "report.atlas_meshes": "已导入图集模型",
+        "report.lods": "已导入 LOD",
         "report.warning": "警告",
         "report.error": "错误",
         "progress.processing": "正在处理导入的资源……",
         "progress.texture": "正在配置纹理：{name}",
+        "progress.lod": "正在导入 LOD{index}：{name}",
     },
 }
 
@@ -118,6 +126,7 @@ BLEND_KEYS = {
     "Opaque": "blend.opaque",
     "Masked": "blend.masked",
     "Translucent": "blend.translucent",
+    "Decal": "blend.decal",
 }
 
 STATIC_MESSAGE_TRANSLATIONS = {
@@ -169,7 +178,7 @@ def blend_to_internal(display_value, language=None):
 
 
 def blend_options(language=None):
-    return [tr(BLEND_KEYS[value], language) for value in ("Masked", "Translucent", "Opaque")]
+    return [tr(BLEND_KEYS[value], language) for value in ("Masked", "Translucent", "Decal", "Opaque")]
 
 
 def localize_message(message, language=None):

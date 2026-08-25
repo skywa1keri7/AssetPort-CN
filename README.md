@@ -1,58 +1,82 @@
 # AssetPort-CN
 
-AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 原作者认可、由社区独立维护的中文增强版。它为 Unreal Engine 5 的批量资源导入流程增加简体中文/英文双语界面，同时保持原项目的英文内部标识与资源命名逻辑，避免本地化影响导入结果。
+[中文](#中文说明) · [English](#english)
 
-AssetPort-CN is an independently maintained bilingual enhanced fork of [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port), created with the upstream author's approval. The original project was created by Colosyn (Shahnawaz Hussain) and is distributed under the MIT License.
+AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 原作者认可、由社区独立维护的 UE5 双语增强版。项目保留上游的英文内部标识和 MIT License，并面向美术生产流程增加自动材质、贴图设置、Atlas、Decal 与 LOD 支持。
 
-> 当前版本：`0.3.0`，基于上游 Asset-Port `v1.5.0`。建议先在测试工程中使用。
+AssetPort-CN is an independently maintained bilingual UE5 fork of [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port), created with the upstream author's approval. It preserves the upstream English identifiers and MIT License while adding artist-oriented material, texture, Atlas, Decal, and LOD workflows.
 
-## 当前改动
+> 开发版本 / Development version: `0.4.0-dev`，基于 / based on Asset-Port `v1.5.0`. 当前修改尚未发布，请先在测试工程中使用。These changes are not released yet; test them in a non-production project first.
 
-- 工具栏按钮和提示支持简体中文、英文。
-- 主导入窗口、预览窗口、透明材质窗口运行时本地化。
-- 分类下拉框显示本地化文本，但内部仍使用原英文分类值。
-- `Opaque`、`Masked`、`Translucent` 可显示为“不透明”“遮罩”“半透明”，材质逻辑仍接收原英文值。
-- 文件夹选择、错误对话框、进度提示、预览警告和导入报告支持双语。
-- 配置读取增加缺失字段、未知字段和损坏 JSON 的基本容错。
-- 主材质缺失时自动生成 `M_资源名_Auto` 普通材质，并连接已识别贴图。
-- 自动材质支持 BaseColor、Normal、Roughness、Metallic、AO、Emissive、Opacity、OpacityMask、ORM 和 RMA。
-- 根据贴图用途自动配置压缩方式和 sRGB；遮罩与通道打包图使用 `Masks` 并关闭 sRGB。
-- 明确识别到 OpacityMask 时自动使用 `Masked`，识别到 Opacity 时自动使用 `Translucent`。
-- 不带 `T_`/`SM_` 前缀的常见素材库文件也能按扩展名识别：图片视为纹理，FBX 默认视为静态网格。
-- 自动忽略文件名中的 `2K`、`4K` 等分辨率标记，并识别 Cavity、Gloss、Specular、Bump、Metalness。
-- 同步上游 v1.5.0 的 Atlas / 模块化套件流程：多个静态网格可共享一套贴图与材质。
-- Atlas 资源同样支持自动混合模式、缺少主材质时生成兜底材质，以及批量挂载到网格。
+---
 
-## Atlas / 模块化套件
+## 中文说明
 
-沿用上游 v1.5.0 的连字符命名约定：
+### 主要功能
+
+- 主导入窗口、预览窗口、透明材质窗口支持简体中文/英文运行时本地化。
+- 主材质缺失时自动生成 `M_资源名_Auto`，连接常用 PBR 贴图。
+- 自动识别并配置 BaseColor、Normal、Roughness、Metallic、AO、Emissive、Opacity、OpacityMask、ORM、RMA 等贴图。
+- 根据用途自动设置纹理压缩和 sRGB；遮罩及通道打包纹理关闭 sRGB。
+- 兼容没有 `T_`/`SM_` 前缀的 Marketplace/Fab 命名，并忽略 `2K`、`4K` 等分辨率标记。
+- 支持 Atlas/模块化套件：多个静态网格共享一套贴图和材质。
+- 透明材质弹窗新增“贴花”选项，可创建 Deferred Decal 材质。
+- 支持 FBX 内嵌 LOD，以及单独导出的 `_LOD0/_LOD1/...` 静态网格文件。
+- 内置母材质图加入中英双语参数说明区；英文参数名作为自动绑定接口继续保留。
+
+### Decal / 贴花材质
+
+检测到透明贴图或 BaseColor Alpha 后，透明材质设置窗口现在提供“不透明”“遮罩”“半透明”和“贴花”。选择“贴花”后，工具优先使用：
 
 ```text
-SM_env_Rock01-RockKit.fbx
-SM_env_Rock02-RockKit.fbx
+/Game/Python/Materials/M_Master_Decal
+```
+
+如果该母材质不存在且启用了兜底材质，工具会生成 Material Domain 为 `Deferred Decal` 的普通材质。贴花材质应放到 Decal Actor 或 Decal Component 上，因此工具不会把它自动挂进静态网格材质槽。
+
+### LOD 导入
+
+单个 FBX 内已有 LOD Group 时，导入器会启用 FBX LOD 导入。单独导出的静态网格可使用：
+
+```text
+SM_env_Rock_LOD0.fbx
+SM_env_Rock_LOD1.fbx
+SM_env_Rock_LOD2.fbx
+T_env_Rock_D.png
+T_env_Rock_N.png
+```
+
+也可以使用无后缀基础网格加 `_LOD1`、`_LOD2`。Atlas/模块化套件写成：
+
+```text
+SM_env_Rock01-RockKit_LOD0.fbx
+SM_env_Rock01-RockKit_LOD1.fbx
+SM_env_Rock02-RockKit_LOD0.fbx
+SM_env_Rock02-RockKit_LOD1.fbx
 T_env_RockKit_D.png
-T_env_RockKit_N.png
 T_env_RockKit_ORM.png
 ```
 
-以上文件会作为一个 `RockKit` 图集资源组导入，两个网格共享同一个
-`MI_RockKit` 材质实例；如果配置的主材质不存在，则生成共享的
-`M_RockKit_Auto` 普通材质。
+独立 LOD 当前针对 Static Mesh。骨骼网格仍使用原有导入流程，遇到独立 LOD 文件时会警告而不会错误合并。
 
-## 自动材质策略
+### 自动材质策略
 
-导入时仍优先使用 `parent_material_opaque`、`parent_material_masked` 和
-`parent_material_translucent` 指定的主材质创建材质实例。只有当前混合模式所需的主材质不存在，且
-`auto_create_material_fallback` 为 `true` 时，才会在资源目录生成普通材质：
+工具优先使用配置的四种母材质创建材质实例：
 
-```text
-M_资源名_Auto
+```json
+{
+  "parent_material_opaque": "/Game/Python/Materials/M_Master_Opaque",
+  "parent_material_masked": "/Game/Python/Materials/M_Master_Masked",
+  "parent_material_translucent": "/Game/Python/Materials/M_Master_Translucent",
+  "parent_material_decal": "/Game/Python/Materials/M_Master_Decal"
+}
 ```
 
-单独的 Roughness、Metallic、AO 贴图优先于 ORM/RMA 中相同的通道，避免输入重复连接。
-如果用户为带 Alpha 的 BaseColor 选择了 Masked 或 Translucent，又没有单独的透明贴图，自动材质会使用 BaseColor Alpha。
+缺少相应母材质且 `auto_create_material_fallback` 为 `true` 时生成 `M_资源名_Auto`。单独的 Roughness、Metallic、AO 贴图优先于 ORM/RMA 中的对应通道。为带 Alpha 的 BaseColor 选择 Masked、Translucent 或 Decal 且没有单独透明贴图时，会使用 BaseColor Alpha。
 
-常用配置：
+母材质图中的中文说明不会重命名 `BaseColour`、`Normal`、`UseORM` 等英文参数，因为这些名称是插件与自定义母材质之间的稳定接口。
+
+### 配置
 
 ```json
 {
@@ -60,88 +84,89 @@ M_资源名_Auto
   "auto_create_material_fallback": true,
   "auto_configure_textures": true,
   "auto_assign_to_mesh": true,
+  "auto_import_lods": true,
+  "replace_existing": false,
+  "language": "zh_CN",
   "opacity_mask_clip_value": 0.333
 }
 ```
 
-- `auto_create_mi`：启用整个自动材质构建步骤（包括实例和兜底普通材质）。
-- `auto_create_material_fallback`：缺少主材质时生成普通材质；关闭后会在报告中记录错误。
-- `auto_configure_textures`：自动设置贴图压缩方式和 sRGB。
-- `opacity_mask_clip_value`：Masked 材质的裁剪阈值，配置读取时限制在 0～1。
+- `auto_import_lods`：导入 FBX 内嵌 LOD，并将独立 `_LOD#` 文件挂到基础 Static Mesh。
+- `auto_assign_to_mesh`：自动给普通网格分配材质；Decal 始终不会分配给网格槽。
+- `opacity_mask_clip_value`：Masked 材质裁剪阈值，限制在 0～1。
+- `language`：支持 `zh_CN` 和 `en_US`。
 
-## 安装
+### 安装
 
-本项目目前沿用上游的 Content/Python 安装方式，不是标准 `.uplugin` 插件。
+本项目沿用上游的 `Content/Python` 安装方式，不是标准 `.uplugin`。
 
-1. 在 Unreal Engine 项目中启用：
-   - Python Editor Script Plugin
-   - Editor Scripting Utilities
-2. 将本仓库以下内容复制到项目的 `Content/Python/`：
-   - `asset_port/`
-   - `Materials/`
-   - `Widgets/`
-   - `importer_config.json`
-   - `init_unreal.py`
+1. 在 UE 项目中启用 `Python Editor Script Plugin` 和 `Editor Scripting Utilities`。
+2. 将 `asset_port/`、`Materials/`、`Widgets/`、`importer_config.json`、`init_unreal.py` 复制到项目的 `Content/Python/`。
 3. 重启 Unreal Editor。
 
-不要把外层 `AssetPort-CN` 文件夹整体放进 `Content/Python`，应复制它里面的内容。
+不要把外层 `AssetPort-CN` 文件夹整体放入 `Content/Python`。
 
-## 切换语言
+### 已知限制
 
-编辑 `importer_config.json`：
+- Widget 固定文字由 Python 在窗口生成后替换；上游修改控件名时需要同步本地化映射。
+- 语言通过 JSON 切换，暂时没有窗口内语言开关。
+- 安装路径仍固定为 `/Game/Python`。
+- Height 贴图会设置为数据纹理，但不会自动连接位移。
+- 独立文件 LOD 当前只支持 Static Mesh；FBX 内嵌 LOD 由 UE 导入器处理。
 
-```json
-{
-  "language": "zh_CN"
-}
-```
+---
 
-支持的值：
+## English
 
-- `zh_CN`：简体中文
-- `en_US`：英文
+### Highlights
 
-修改后关闭并重新打开 AssetPort 窗口。工具栏名称需要刷新菜单或重启编辑器后更新。
+- Runtime Simplified Chinese/English localization for the main, preview, and transparency windows.
+- Connected `M_*_Auto` fallback materials when a configured master is missing.
+- Automatic PBR mapping and texture settings for Base Color, Normal, Roughness, Metallic, AO, Emissive, Opacity, Opacity Mask, ORM, RMA, and related aliases.
+- Prefixless Marketplace/Fab filenames with resolution tokens such as `2K` and `4K` ignored during grouping.
+- Atlas/modular-kit workflow with one shared material across multiple meshes.
+- A `Decal` choice in the transparency dialog, backed by a Deferred Decal master material.
+- Embedded FBX LOD import and separately exported `_LOD0/_LOD1/...` Static Mesh files.
+- Bilingual legends inside the bundled master-material graphs while stable English parameter identifiers remain unchanged.
 
-## 双语实现原则
+### Decal materials
 
-界面只翻译显示文本，以下内部值保持英文：
+The transparency dialog now offers `Opaque`, `Masked`, `Translucent`, and `Decal`. Decal uses `/Game/Python/Materials/M_Master_Decal`. If the master is missing and fallback generation is enabled, AssetPort-CN creates a material with the `Deferred Decal` domain. Decal materials belong on Decal Actors or Decal Components, so they are intentionally not assigned to Static Mesh material slots.
 
-- 分类路径：`Environment`、`Weapons`、`Props`、`Characters`
-- 混合模式：`Opaque`、`Masked`、`Translucent`
-- 资源前后缀及材质参数名
-- Unreal 资源路径
+### LOD import
 
-这样中文界面不会改变原项目的路由、材质和命名行为。
+LOD groups embedded in one FBX are enabled through the FBX import settings. Separately exported Static Mesh LODs use `SM_env_Rock_LOD0.fbx`, `SM_env_Rock_LOD1.fbx`, and so on. An unsuffixed base mesh plus `_LOD1` and later files is also valid. Atlas meshes use the marker after the kit name, for example `SM_env_Rock01-RockKit_LOD1.fbx`.
 
-## 已知限制
+Separate-file LOD attachment currently targets Static Mesh assets. Skeletal Mesh files remain on the original import path and produce a warning instead of being merged incorrectly.
 
-- Editor Utility Widget 的固定文字通过 Python 在窗口生成后替换；如果上游重命名控件，需要同步更新 `asset_port/ui_localization.py`。
-- 当前语言通过 JSON 配置切换，窗口内语言选择器将在后续版本加入。
-- 上游 Widget 资源位于 `/Game/Python/Widgets`，当前版本仍依赖该安装路径。
-- 自动生成材质目前连接常用 PBR 输入；Height 只会配置为 Masks，不会擅自连接位移。
-- 无前缀 FBX 默认按静态网格导入；骨骼网格仍建议使用 `SK_` 前缀明确标识。
+### Material policy
 
-## 上游与许可证
+AssetPort-CN first tries the configured Opaque, Masked, Translucent, or Decal master. If it is unavailable and fallback generation is enabled, it creates `M_<Asset>_Auto` and wires recognized PBR inputs. Dedicated Roughness, Metallic, and AO textures take priority over matching ORM/RMA channels. Base Color alpha is used for Masked, Translucent, or Decal when no dedicated opacity texture exists.
 
-本项目基于 AssetPort 修改：
+The bilingual master-material graph legend explains the artist-facing meaning of each parameter. Identifiers such as `BaseColour`, `Normal`, and `UseORM` remain English because they form the stable binding API for bundled and custom master materials.
 
-- 原项目：https://github.com/Colosyn/Asset-Port
-- 原作者：Colosyn（Shahnawaz Hussain）
-- 原许可证：MIT License
+### Configuration and installation
 
-原项目版权声明和 MIT 许可证全文保留在 [LICENSE](LICENSE) 中。
-更完整的来源与修改声明见 [NOTICE](NOTICE)。
+See `importer_config.json`. The new keys are `parent_material_decal` and `auto_import_lods`; `language` accepts `zh_CN` or `en_US`.
 
-## 开发计划
+Enable `Python Editor Script Plugin` and `Editor Scripting Utilities`, then copy `asset_port/`, `Materials/`, `Widgets/`, `importer_config.json`, and `init_unreal.py` into the project's `Content/Python/` directory and restart Unreal Editor. Copy the repository contents, not the outer `AssetPort-CN` folder itself.
 
-- [x] Python 菜单、对话框和提示双语化
-- [x] 主窗口、预览窗口、透明材质窗口运行时双语化
-- [x] 分类与混合模式显示值/内部值分离
-- [x] 缺少主材质时生成基础 PBR 材质
-- [x] 按贴图用途自动设置压缩与 sRGB
-- [x] 兼容上游 v1.5.0 Atlas / 模块化套件管线
-- [ ] 在主窗口中增加语言切换控件
-- [ ] 增加可视化设置面板
-- [ ] 扩展 UDIM、EXR Alpha 和重复事件绑定的跨版本测试
-- [ ] 封装为标准 Unreal Engine 插件
+### Known limitations
+
+- Widget text is relabelled at runtime; renamed upstream widgets require localization-map updates.
+- Language selection currently lives in JSON rather than in the tool window.
+- The content path remains `/Game/Python`.
+- Height maps are configured as data textures but are not connected to displacement.
+- Separate-file LOD attachment currently supports Static Mesh assets only.
+
+---
+
+## Upstream, authorship, and license / 上游、署名与许可证
+
+- Upstream / 原项目: https://github.com/Colosyn/Asset-Port
+- Original author / 原作者: Colosyn (Shahnawaz Hussain)
+- License / 许可证: MIT License
+
+The original copyright notice and MIT License are preserved in [LICENSE](LICENSE). See [NOTICE](NOTICE) for provenance and modification notes.
+
+原始版权声明和 MIT License 全文保留在 [LICENSE](LICENSE)；来源与修改说明见 [NOTICE](NOTICE)。

@@ -68,6 +68,38 @@ class MarketplaceFilenameTests(unittest.TestCase):
         self.assertEqual(unknown.asset_type, AssetType.UNKNOWN)
         self.assertEqual(self.detector.group_assets([unknown]), [])
 
+    def test_separate_static_mesh_lods_share_one_group(self):
+        assets = [
+            self.detector.detect_file("SM_env_Rock_LOD0.fbx"),
+            self.detector.detect_file("SM_env_Rock_LOD1.fbx"),
+            self.detector.detect_file("SM_env_Rock_LOD2.fbx"),
+            self.detector.detect_file("T_env_Rock_D.png"),
+        ]
+
+        groups = self.detector.group_assets(assets)
+
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(groups[0].mesh.lod_index, 0)
+        self.assertEqual([item.lod_index for item in groups[0].lod_meshes], [1, 2])
+        self.assertEqual(groups[0].base_name, "Rock")
+
+    def test_atlas_lods_are_kept_per_mesh(self):
+        assets = [
+            self.detector.detect_file("SM_env_Rock01-RockKit_LOD0.fbx"),
+            self.detector.detect_file("SM_env_Rock01-RockKit_LOD1.fbx"),
+            self.detector.detect_file("SM_env_Rock02-RockKit_LOD0.fbx"),
+            self.detector.detect_file("SM_env_Rock02-RockKit_LOD1.fbx"),
+            self.detector.detect_file("T_env_RockKit_D.png"),
+        ]
+
+        atlas_groups, remaining = self.detector.group_atlas_assets(assets)
+
+        self.assertEqual(remaining, [])
+        self.assertEqual(atlas_groups[0].mesh_count, 2)
+        self.assertEqual(
+            sorted(atlas_groups[0].lod_meshes), ["SM_Rock01", "SM_Rock02"]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

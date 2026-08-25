@@ -11,6 +11,7 @@ def log_pipeline_report(report: PipelineReport, selected_path :str, dry_run = Fa
         unreal.log(f"{tr('report.scanned')}: {report.total_scanned}")
         unreal.log(f"{tr('report.mi_created')}: {report.mis_created}")
         unreal.log(f"{tr('report.atlas_groups')}: {report.atlas_group_found}")
+        unreal.log(f"{tr('report.lods')}: {report.lods_imported}")
         unreal.log("===================================================")
         if report.warnings:
             for warning in report.warnings:
@@ -24,6 +25,7 @@ def log_pipeline_report(report: PipelineReport, selected_path :str, dry_run = Fa
         unreal.log(f"{tr('report.scanned')}: {report.total_scanned} | {tr('report.imported')}: {report.asset_import}")
         unreal.log(f"{tr('report.mi_created')}: {report.mis_created} | {tr('report.mi_linked')}: {report.mis_linked}")
         unreal.log(f"{tr('report.atlas_groups')}: {report.atlas_group_found}")
+        unreal.log(f"{tr('report.lods')}: {report.lods_imported}")
         unreal.log("===================================================")
         if report.warnings:
             for warning in report.warnings:
@@ -38,6 +40,7 @@ def log_pipeline_report(report: PipelineReport, selected_path :str, dry_run = Fa
         with open(preview_file_path, "w", encoding="utf-8") as f:
             f.write("AssetPort Preview Report\n")
             f.write(f"{tr('report.scanned')}: {report.total_scanned}\n")
+            f.write(f"{tr('report.lods')}: {report.lods_imported}\n")
             
             if report.warnings:
                 for warning in report.warnings:
@@ -54,6 +57,7 @@ def log_pipeline_report(report: PipelineReport, selected_path :str, dry_run = Fa
             f.write(f"{tr('report.scanned')}: {report.total_scanned}\n")
             f.write(f"{tr('report.imported')}: {report.asset_import}\n")
             f.write(f"{tr('report.atlas_meshes')}: {report.atlas_meshes_imported}\n")
+            f.write(f"{tr('report.lods')}: {report.lods_imported}\n")
 
             if report.warnings:
                 for warning in report.warnings:

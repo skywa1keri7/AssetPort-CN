@@ -254,10 +254,26 @@ def on_preview_clicked():
                 )
             if isinstance(group, AssetGroup) and  group.mesh is not None:
                 mesh_name = group.mesh.ue_path.split("/")[-1]
+                if group.lod_meshes:
+                    indices = ", ".join(
+                        str(item.lod_index) for item in sorted(
+                            group.lod_meshes, key=lambda item: item.lod_index
+                        )
+                    )
+                    mesh_name = f"{mesh_name}  [{tr('preview.lods', indices=indices)}]"
                 import_asset_name.append(f"{display_folder}|{mesh_name}")
             elif isinstance(group, AtlasGroup):
                 for mesh in group.mesh_list:
                     mesh_name = mesh.ue_path.split("/")[-1]
+                    mesh_key = mesh.ue_asset_name or mesh.base_name
+                    lods = group.lod_meshes.get(mesh_key, [])
+                    if lods:
+                        indices = ", ".join(
+                            str(item.lod_index) for item in sorted(
+                                lods, key=lambda item: item.lod_index
+                            )
+                        )
+                        mesh_name = f"{mesh_name}  [{tr('preview.lods', indices=indices)}]"
                     import_asset_name.append(f"{display_folder}|{mesh_name}")
             for texture in group.texture_list:
                 texture_name = texture.ue_path.split("/")[-1]

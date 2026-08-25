@@ -14,6 +14,8 @@ the upstream project's release artifacts.
 
 AssetPort-CN modifications include bilingual Chinese/English UI support,
 automatic material fallback generation, texture compression rules, and
-compatibility with common prefixless marketplace asset names.
+compatibility with common prefixless marketplace asset names. Later additions
+include Atlas integration, Deferred Decal material support, Static Mesh LOD
+import, bilingual master-material guidance, and bilingual documentation.
 
 Modifications Copyright (c) 2026 skywa1keri7

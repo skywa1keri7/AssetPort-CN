@@ -10,6 +10,7 @@ class ImporterSettings():
     parent_material_opaque : str ="/Game/Python/Materials/M_Master_Opaque"
     parent_material_masked : str ="/Game/Python/Materials/M_Master_Masked"
     parent_material_translucent : str = "/Game/Python/Materials/M_Master_Translucent"
+    parent_material_decal : str = "/Game/Python/Materials/M_Master_Decal"
     auto_create_mi : bool = True
     auto_create_material_fallback : bool = True
     auto_configure_textures : bool = True
@@ -18,6 +19,7 @@ class ImporterSettings():
     organize_asset : bool = True
     language : str = "zh_CN"
     opacity_mask_clip_value : float = 0.333
+    auto_import_lods : bool = True
 
 def config_loader():
     settings = ImporterSettings()

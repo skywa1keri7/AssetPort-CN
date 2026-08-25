@@ -29,11 +29,15 @@ def _master_path(blend_mode, config):
         return config.parent_material_masked
     if blend_mode == "Translucent":
         return config.parent_material_translucent
+    if blend_mode == "Decal":
+        return config.parent_material_decal
     return config.parent_material_opaque
 
 
-def _assign_material(mesh_object, material, group, slot_name, config):
-    if not mesh_object or not config.auto_assign_to_mesh:
+def _assign_material(mesh_object, material, group, slot_name, config, blend_mode="Opaque"):
+    # Deferred decal materials belong on Decal Actors/Components, not in a
+    # Static Mesh material slot.
+    if blend_mode == "Decal" or not mesh_object or not config.auto_assign_to_mesh:
         return False
 
     if group.is_multi_material:
@@ -92,10 +96,15 @@ def _configure_generated_material(material, textures, blend_mode, config):
         "Opaque": unreal.BlendMode.BLEND_OPAQUE,
         "Masked": unreal.BlendMode.BLEND_MASKED,
         "Translucent": unreal.BlendMode.BLEND_TRANSLUCENT,
+        "Decal": unreal.BlendMode.BLEND_TRANSLUCENT,
     }
     material.set_editor_property(
         "blend_mode", blend_values.get(blend_mode, unreal.BlendMode.BLEND_OPAQUE)
     )
+    if blend_mode == "Decal":
+        decal_domain = getattr(unreal.MaterialDomain, "MD_DEFERRED_DECAL", None)
+        if decal_domain is not None:
+            material.set_editor_property("material_domain", decal_domain)
     if blend_mode == "Masked":
         material.set_editor_property("opacity_mask_clip_value", config.opacity_mask_clip_value)
 
@@ -140,7 +149,7 @@ def _configure_generated_material(material, textures, blend_mode, config):
     if base_color and base_color.has_alpha and base_expression:
         if blend_mode == "Masked" and "opacity_mask" not in connected_inputs:
             _connect_property(base_expression, "A", "opacity_mask")
-        elif blend_mode == "Translucent" and "opacity" not in connected_inputs:
+        elif blend_mode in ("Translucent", "Decal") and "opacity" not in connected_inputs:
             _connect_property(base_expression, "A", "opacity")
 
     layout = getattr(unreal.MaterialEditingLibrary, "layout_material_expressions", None)
@@ -192,7 +201,7 @@ def _create_material_instance(mi_name, mi_package, textures, blend_mode, parent_
         return None, mi_path, {}
 
     mi.set_editor_property("parent", parent_material)
-    if blend_mode in ("Masked", "Translucent"):
+    if blend_mode in ("Masked", "Translucent", "Decal"):
         base_color = next(
             (texture for texture in textures if texture.texture_slot == TextureSlot.BASE_COLOUR),
             None,
@@ -292,7 +301,7 @@ def create_material_instance(group: AssetGroup, config: ImporterSettings, decisi
             report.errors.append(f"Could not create material asset for {group.base_name}")
             continue
 
-        if _assign_material(mesh_object, material, group, slot_name, config):
+        if _assign_material(mesh_object, material, group, slot_name, config, blend_mode):
             report.mesh_linked = group.mesh.base_name
         report.success = True
 
@@ -351,7 +360,7 @@ def create_atlas_material_instance(
         return report
 
     linked = False
-    if config.auto_assign_to_mesh:
+    if config.auto_assign_to_mesh and blend_mode != "Decal":
         for mesh in group_atlas.mesh_list:
             mesh_object = unreal.EditorAssetLibrary.load_asset(mesh.ue_path) if mesh else None
             if mesh_object is None:

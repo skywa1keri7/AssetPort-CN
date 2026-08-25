@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — 0.4.0-dev
+
+- Added a localized Decal choice to the transparency workflow.
+- Added a bundled Deferred Decal master material and safe fallback generation.
+- Enabled embedded FBX LOD import and separate `_LOD0/_LOD1/...` Static Mesh files, including Atlas kits.
+- Added bilingual guidance inside the bundled master-material graphs while preserving stable English parameter identifiers.
+- Reworked README into complete Chinese and English sections.
+
 ## [0.3.0] - 2026-08-22
 
 ### Added

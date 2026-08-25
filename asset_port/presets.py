@@ -11,7 +11,13 @@ def get_mesh_setting(asset: DetectedAsset):
     
     if asset.asset_type == AssetType.STATIC_MESH :
         fbx.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH
+        # Imports LOD groups embedded in a single FBX. Separately exported
+        # ``_LOD1`` files are attached after the base mesh import.
         static_mesh = fbx.static_mesh_import_data
+        try:
+            static_mesh.import_mesh_lods = True
+        except Exception:
+            pass
         static_mesh.combine_meshes = True
         static_mesh.generate_lightmap_u_vs = True
         
