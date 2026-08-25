@@ -6,7 +6,7 @@ AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 原
 
 AssetPort-CN is an independently maintained bilingual UE5 fork of [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port), created with the upstream author's approval. It preserves the upstream English identifiers and MIT License while adding artist-oriented material, texture, Atlas, Decal, and LOD workflows.
 
-> 当前版本 / Current version: `0.4.2 Beta`。本次更新修复贴花材质实例中的独立 `_Opacity` 贴图自动绑定。This release fixes automatic binding of dedicated `_Opacity` textures in Decal Material Instances.
+> 当前版本 / Current version: `0.4.3 Beta`。本次更新将四颗内置母材质重新保存为 UE5.6 兼容资产，同时保留 0.4.2 的贴花透明贴图绑定修复。This release rebuilds all four bundled masters as UE5.6-compatible assets while retaining the 0.4.2 Decal opacity-binding fix.
 
 ---
 
@@ -108,6 +108,8 @@ T_env_RockKit_ORM.png
 
 不要把外层 `AssetPort-CN` 文件夹整体放入 `Content/Python`。
 
+四颗内置母材质使用 UE5.6 重新保存，并已在 UE5.7 中完成向前兼容加载检查。推荐支持范围为 UE5.6 及更新的 UE5 版本；不同小版本仍建议先在测试工程中验证。
+
 ### 已知限制
 
 - Widget 固定文字由 Python 在窗口生成后替换；上游修改控件名时需要同步本地化映射。
@@ -154,6 +156,8 @@ Material Instance group headers and individual parameters, plus the master-mater
 See `importer_config.json`. The new keys are `parent_material_decal` and `auto_import_lods`; `language` accepts `zh_CN` or `en_US`.
 
 Enable `Python Editor Script Plugin` and `Editor Scripting Utilities`, then copy `asset_port/`, `Materials/`, `Widgets/`, `importer_config.json`, and `init_unreal.py` into the project's `Content/Python/` directory and restart Unreal Editor. Copy the repository contents, not the outer `AssetPort-CN` folder itself.
+
+The four bundled master materials are saved with UE5.6 and have passed forward-loading checks in UE5.7. The recommended support range is UE5.6 and newer UE5 releases; validate in a test project before production use on a different minor version.
 
 ### Known limitations
 

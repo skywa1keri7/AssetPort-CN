@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.3] - 2026-08-25
+
+- Re-saved all four bundled master materials in Unreal Engine 5.6 so they remain visible and usable in UE 5.6 while retaining forward compatibility with newer UE5 versions.
+- Verified the bilingual parameter names and groups, required texture/static-switch parameters, and the Deferred Decal domain after the compatibility rebuild.
+
 ## [0.4.2] - 2026-08-25
 
 - Fixed dedicated `_Opacity` textures not binding to the bundled Decal master's `OpacityMask` parameter while preserving custom masters that expose `Opacity` directly.
