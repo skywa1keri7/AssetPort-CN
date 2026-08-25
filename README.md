@@ -1,6 +1,11 @@
 # AssetPort-CN
 
-[中文](#中文说明) · [English](#english)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Unreal Engine Version](https://img.shields.io/badge/Unreal%20Engine-5.6%20%7C%205.7%20Verified-blue)](https://www.unrealengine.com/)
+[![Language: Python](https://img.shields.io/badge/Language-Python-green)](https://www.python.org/)
+[![UI: Simplified Chinese / English](https://img.shields.io/badge/UI-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%20%7C%20English-red)](#语言与运行环境)
+
+[中文说明](#中文说明) · [English](#english) · [开发计划 / Roadmap](ROADMAP.md) · [更新记录 / Changelog](CHANGELOG.md)
 
 AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 原作者认可、由社区独立维护的 UE5 双语增强版。项目保留上游的英文内部标识和 MIT License，并面向美术生产流程增加自动材质、贴图设置、Atlas、Decal 与 LOD 支持。
 
@@ -11,6 +16,33 @@ AssetPort-CN is an independently maintained bilingual UE5 fork of [Colosyn/Asset
 ---
 
 ## 中文说明
+
+### 语言与运行环境
+
+| 项目 | 当前状态 |
+| --- | --- |
+| 界面语言 | 简体中文 `zh_CN`、英文 `en_US` |
+| Unreal Engine | UE5.6、UE5.7 已验证；其他小版本建议先在测试工程验证 |
+| 母材质资产版本 | 四颗内置母材质由 UE5.6 保存 |
+| 操作系统 | Windows 11 已验证；其他桌面平台尚未完整测试 |
+| Python | 使用 Unreal Editor 内置 Python，不需要另外安装系统 Python |
+| 必需插件 | `Python Editor Script Plugin`、`Editor Scripting Utilities` |
+| 安装形式 | 复制到项目的 `Content/Python/`；本项目不是 `.uplugin` |
+
+运行时界面支持中英文切换，但内部类别名、配置键和兼容别名继续使用英文，方便与上游同步，也避免语言切换破坏既有工程。
+
+### UE 版本兼容性
+
+Unreal 的 `.uasset` 通常可以由新版本读取旧版本资产，但旧版本不能可靠读取新版本保存的资产。代码兼容并不等于二进制资产兼容。
+
+- `v0.4.2` 的四颗母材质曾由 UE5.7 保存，因此 UE5.6 会将它们视为不可读取资产，表现为内容浏览器中“母材质消失”。
+- `v0.4.3` 已将 `Opaque`、`Masked`、`Translucent`、`Decal` 四颗母材质全部使用 UE5.6 重新生成并保存。
+- 四颗 UE5.6 母材质已在 UE5.7 完成向前兼容加载、双语参数、透明遮罩和 Deferred Decal 检查。
+- 默认 VT 贴图和 Editor Utility Widgets 保持 UE5.3 资产版本，可由 UE5.6/5.7 向前读取。
+- 自动测试会检查仓库内 `.uasset` 的引擎版本标记，阻止误提交需要 UE5.7 或更高版本的发行资产。
+- 当前不宣称完整支持 UE5.3～5.5；计划中的“当前引擎自动生成母材质”将进一步减少二进制版本依赖，详见 [开发计划](ROADMAP.md)。
+
+发布包的推荐范围是 UE5.6 和 UE5.7。更高 UE5 小版本预计可向前读取这些资产，但在列入“已验证”前仍应先用测试工程检查。
 
 ### 主要功能
 
@@ -108,7 +140,11 @@ T_env_RockKit_ORM.png
 
 不要把外层 `AssetPort-CN` 文件夹整体放入 `Content/Python`。
 
-四颗内置母材质使用 UE5.6 重新保存，并已在 UE5.7 中完成向前兼容加载检查。推荐支持范围为 UE5.6 及更新的 UE5 版本；不同小版本仍建议先在测试工程中验证。
+四颗内置母材质使用 UE5.6 重新保存，并已在 UE5.7 中完成向前兼容加载检查。当前已验证范围为 UE5.6 和 UE5.7；其他小版本应先在测试工程中验证。
+
+### 开发计划
+
+后续方向包括当前 UE 版本自动生成共享母材质、双面植物材质、自发光材质、布料/绒毛材质，以及更完整的版本兼容矩阵。规划不代表功能已经完成，具体范围与优先级见 [ROADMAP.md](ROADMAP.md)。
 
 ### 已知限制
 
@@ -121,6 +157,33 @@ T_env_RockKit_ORM.png
 ---
 
 ## English
+
+### Languages and environment
+
+| Item | Current status |
+| --- | --- |
+| UI languages | Simplified Chinese `zh_CN` and English `en_US` |
+| Unreal Engine | Verified on UE5.6 and UE5.7; test other minor versions before production use |
+| Master asset baseline | All four bundled master materials are saved with UE5.6 |
+| Operating system | Verified on Windows 11; other desktop platforms are not fully tested |
+| Python | Uses Unreal Editor's embedded Python; no separate system Python installation is required |
+| Required plugins | `Python Editor Script Plugin` and `Editor Scripting Utilities` |
+| Installation model | Copy into the project's `Content/Python/`; this is not a `.uplugin` package |
+
+The runtime UI can switch languages, while internal category identifiers, configuration keys, and compatibility aliases remain in English for upstream interoperability and project stability.
+
+### Unreal Engine compatibility
+
+New Unreal versions can generally read assets saved by older versions, but older versions cannot reliably read newer `.uasset` files. Source-code compatibility does not guarantee binary-asset compatibility.
+
+- The four masters in `v0.4.2` were accidentally saved by UE5.7, so UE5.6 treated them as unreadable and hid them from the Content Browser.
+- `v0.4.3` rebuilds and saves the bundled Opaque, Masked, Translucent, and Decal masters with UE5.6.
+- The rebuilt masters passed UE5.7 forward-loading checks, including bilingual parameters, opacity-mask inputs, and the Deferred Decal domain.
+- Default VT textures and Editor Utility Widgets remain UE5.3 assets and forward-load in UE5.6/5.7.
+- An automated test now checks engine markers in bundled `.uasset` files and rejects release assets that require UE5.7 or newer.
+- Full UE5.3–5.5 support is not claimed. A future current-engine master-material generator is planned to reduce binary-version coupling; see the [roadmap](ROADMAP.md).
+
+The recommended release range is UE5.6 and UE5.7. Newer UE5 minor releases are expected to forward-load these assets, but remain unverified until tested in a clean project.
 
 ### Highlights
 
@@ -157,7 +220,11 @@ See `importer_config.json`. The new keys are `parent_material_decal` and `auto_i
 
 Enable `Python Editor Script Plugin` and `Editor Scripting Utilities`, then copy `asset_port/`, `Materials/`, `Widgets/`, `importer_config.json`, and `init_unreal.py` into the project's `Content/Python/` directory and restart Unreal Editor. Copy the repository contents, not the outer `AssetPort-CN` folder itself.
 
-The four bundled master materials are saved with UE5.6 and have passed forward-loading checks in UE5.7. The recommended support range is UE5.6 and newer UE5 releases; validate in a test project before production use on a different minor version.
+The four bundled master materials are saved with UE5.6 and have passed forward-loading checks in UE5.7. The currently verified range is UE5.6 and UE5.7; validate any other minor version in a test project first.
+
+### Roadmap
+
+Planned directions include current-engine shared master generation, two-sided foliage, emissive, and cloth/fuzz material workflows, plus a broader engine compatibility matrix. Planned items are not completed features; see [ROADMAP.md](ROADMAP.md) for scope and priorities.
 
 ### Known limitations
 
