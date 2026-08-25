@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 0.4.1-dev
+## [0.4.1] - 2026-08-25
 
 - Added bilingual Chinese/English parameter-group headers to all four bundled master materials.
 - Added bilingual Chinese/English labels for the individual texture, scalar, vector, and switch parameters.
