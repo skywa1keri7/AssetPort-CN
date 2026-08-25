@@ -19,7 +19,7 @@ class AssetRouter():
             path_lower = file_path.lower()
             
             if "weapon" in path_lower or "wpn" in path_lower:
-                category = "Weapon"
+                category = "Weapons"
                
             elif "environment" in path_lower or "env" in path_lower:
                 category = "Environment"
@@ -28,7 +28,13 @@ class AssetRouter():
                 category = "Props"
                 
             elif "character" in path_lower or "char" in path_lower:
-                category = "Character"
+                category = "Characters"
+
+            elif "vehicle" in path_lower or "veh" in path_lower:
+                category = "Vehicles"
+
+            elif "effect" in path_lower or "fx" in path_lower or "vfx" in path_lower:
+                category = "Effects"
                 
             else:
                 category = "_Unsorted"
@@ -69,7 +75,7 @@ class AssetRouter():
             path_lower = file_path.lower()
                     
             if "weapon" in path_lower or "wpn" in path_lower:
-                category = "Weapon"
+                category = "Weapons"
                        
             elif "environment" in path_lower or "env" in path_lower:
                 category = "Environment"
@@ -78,7 +84,13 @@ class AssetRouter():
                 category = "Props"
                         
             elif "character" in path_lower or "char" in path_lower:
-                category = "Character"
+                category = "Characters"
+
+            elif "vehicle" in path_lower or "veh" in path_lower:
+                category = "Vehicles"
+
+            elif "effect" in path_lower or "fx" in path_lower or "vfx" in path_lower:
+                category = "Effects"
                         
             else:
                 category = "_Unsorted"
@@ -103,4 +115,3 @@ class AssetRouter():
         
     
             
-     

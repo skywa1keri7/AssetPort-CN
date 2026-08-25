@@ -37,6 +37,8 @@ TRANSLATIONS = {
         "category.weapons": "Weapons",
         "category.props": "Props",
         "category.characters": "Characters",
+        "category.vehicles": "Vehicles",
+        "category.effects": "Effects",
         "blend.opaque": "Opaque",
         "blend.masked": "Masked",
         "blend.translucent": "Translucent",
@@ -82,6 +84,8 @@ TRANSLATIONS = {
         "category.weapons": "武器",
         "category.props": "道具",
         "category.characters": "角色",
+        "category.vehicles": "载具",
+        "category.effects": "特效",
         "blend.opaque": "不透明",
         "blend.masked": "遮罩",
         "blend.translucent": "半透明",
@@ -112,6 +116,10 @@ CATEGORY_KEYS = {
     "Character": "category.characters",
     "Characters": "category.characters",
     "Charactor": "category.characters",
+    "Vehicle": "category.vehicles",
+    "Vehicles": "category.vehicles",
+    "Effect": "category.effects",
+    "Effects": "category.effects",
 }
 
 CATEGORY_INTERNAL = {
@@ -120,6 +128,8 @@ CATEGORY_INTERNAL = {
     "category.weapons": "Weapons",
     "category.props": "Props",
     "category.characters": "Characters",
+    "category.vehicles": "Vehicles",
+    "category.effects": "Effects",
 }
 
 BLEND_KEYS = {
@@ -156,6 +166,8 @@ def category_options(language=None):
         tr("category.weapons", language),
         tr("category.props", language),
         tr("category.characters", language),
+        tr("category.vehicles", language),
+        tr("category.effects", language),
     ]
 
 

@@ -5,8 +5,10 @@ import re
 PREFIX_MAP = {
     "sm": AssetType.STATIC_MESH,
     "sk": AssetType.SKELETAL_MESH,
+    "skm": AssetType.SKELETAL_MESH,
     "t": AssetType.TEXTURE,
     "a": AssetType.ANIMATION,
+    "anim": AssetType.ANIMATION,
     }
 
 SUFFIX_MAP ={
@@ -15,6 +17,7 @@ SUFFIX_MAP ={
     "d": TextureSlot.BASE_COLOUR,
     "diffuse" : TextureSlot.BASE_COLOUR,
     "albedo": TextureSlot.BASE_COLOUR,
+    "alb": TextureSlot.BASE_COLOUR,
     "basecolor": TextureSlot.BASE_COLOUR,
     
     "n": TextureSlot.NORMAL,
@@ -54,6 +57,7 @@ SUFFIX_MAP ={
     "bump" : TextureSlot.HEIGHT,
     
     "orm" : TextureSlot.ORM,
+    "arm" : TextureSlot.ORM,
     "rma" : TextureSlot.RMA,
 }
 
@@ -63,6 +67,8 @@ CATEGORY_MAP ={
     "wpn" : "Weapons",
     "prop" : "Props",
     "char" : "Characters",
+    "veh" : "Vehicles",
+    "fx" : "Effects",
 
 }
 
@@ -141,8 +147,10 @@ class AssetDetector:
         kit_name = ""
         ue_asset_name = ""
         
-        if "-" in parsed_name and (
-            prefix in ("sm", "sk") or inferred_type == AssetType.STATIC_MESH
+        parsed_asset_type = PREFIX_MAP.get(prefix, inferred_type)
+        if "-" in parsed_name and parsed_asset_type in (
+            AssetType.STATIC_MESH,
+            AssetType.SKELETAL_MESH,
         ):
             parts = parsed_name.rsplit("-", 1)
             individual_name = parts[0]
@@ -165,7 +173,7 @@ class AssetDetector:
         suffix = suffix_raw if suffix_raw else ""
             
         
-        asset_type = PREFIX_MAP.get(prefix, inferred_type)
+        asset_type = parsed_asset_type
         
         category = CATEGORY_MAP.get(category_str, None) if category_str else None
         
@@ -249,6 +257,19 @@ class AssetDetector:
             if asset.category:
                 group.category = asset.category
         
+        # A category marker on either the mesh or one of its textures applies
+        # to the complete group. This prevents a prefixless texture from being
+        # routed away from its categorized mesh (and vice versa).
+        for group in groups.values():
+            if not group.category:
+                continue
+            if group.mesh:
+                group.mesh.category = group.category
+            for texture in group.texture_list:
+                texture.category = group.category
+            for lod_mesh in group.lod_meshes:
+                lod_mesh.category = group.category
+
         return list(groups.values())
             
             
@@ -288,12 +309,24 @@ class AssetDetector:
         atlas_group = []
         
         for kit_name, meshes in kit_meshes.items():
+            textures = kit_textures.get(kit_name, [])
+            lods_by_mesh = atlas_lods.get(kit_name, {})
+            all_lods = [lod for lods in lods_by_mesh.values() for lod in lods]
+            all_kit_assets = meshes + textures + all_lods
+            kit_category = next(
+                (asset.category for asset in all_kit_assets if asset.category),
+                None,
+            )
+            if kit_category:
+                for asset in all_kit_assets:
+                    asset.category = kit_category
+
             group = AtlasGroup(
                 kit_name=kit_name,
                 mesh_list=meshes,
-                texture_list=kit_textures.get(kit_name,[]),
-                category=meshes[0].category,
-                lod_meshes=atlas_lods.get(kit_name, {}),
+                texture_list=textures,
+                category=kit_category,
+                lod_meshes=lods_by_mesh,
             )
             atlas_group.append(group)
             

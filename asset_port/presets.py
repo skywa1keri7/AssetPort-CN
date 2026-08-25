@@ -23,8 +23,9 @@ def get_mesh_setting(asset: DetectedAsset):
         
     elif asset.asset_type == AssetType.SKELETAL_MESH:
       fbx.mesh_type_to_import = unreal.FBXImportType.FBXIT_SKELETAL_MESH  
-      skeletal_mesh = fbx.skeletal_mesh_import_data
-      skeletal_mesh.import_content_type =  unreal.FBXImportContentType.FBXICT_GEOMETRY
+      # ``FbxSkeletalMeshImportData.import_content_type`` is not exposed in
+      # every supported UE version and caused an AttributeError during import.
+      fbx.import_as_skeletal = True
       
     else:
         fbx.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH

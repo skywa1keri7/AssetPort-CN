@@ -18,7 +18,7 @@ from asset_port.ui_localization import localize_main_widget  # noqa: E402,F401
 
 
 assert tr("app.name")
-assert len(category_options()) == 5
+assert len(category_options()) == 7
 assert hasattr(unreal.MaterialEditingLibrary, "create_material_expression")
 assert hasattr(unreal.MaterialEditingLibrary, "connect_material_property")
 assert hasattr(unreal.MaterialEditingLibrary, "recompile_material")

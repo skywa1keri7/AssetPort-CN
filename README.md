@@ -6,7 +6,7 @@ AssetPort-CN 是 [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port) 原
 
 AssetPort-CN is an independently maintained bilingual UE5 fork of [Colosyn/Asset-Port](https://github.com/Colosyn/Asset-Port), created with the upstream author's approval. It preserves the upstream English identifiers and MIT License while adding artist-oriented material, texture, Atlas, Decal, and LOD workflows.
 
-> 开发版本 / Development version: `0.4.0-dev`，基于 / based on Asset-Port `v1.5.0`. 当前修改尚未发布，请先在测试工程中使用。These changes are not released yet; test them in a non-production project first.
+> 开发版本 / Development version: `0.4.0-dev`，已吸收 / incorporates Asset-Port `v1.5.2` improvements. 当前修改尚未发布，请先在测试工程中使用。These changes are not released yet; test them in a non-production project first.
 
 ---
 
@@ -20,6 +20,8 @@ AssetPort-CN is an independently maintained bilingual UE5 fork of [Colosyn/Asset
 - 根据用途自动设置纹理压缩和 sRGB；遮罩及通道打包纹理关闭 sRGB。
 - 兼容没有 `T_`/`SM_` 前缀的 Marketplace/Fab 命名，并忽略 `2K`、`4K` 等分辨率标记。
 - 支持 Atlas/模块化套件：多个静态网格共享一套贴图和材质。
+- 同步 v1.5.2 的分类继承、载具/特效分类、骨骼网格导入与多材质修复。
+- 识别 `skm_`、`anim_`、`_alb`、`_arm` 等 Fab/Marketplace 别名。
 - 透明材质弹窗新增“贴花”选项，可创建 Deferred Decal 材质。
 - 支持 FBX 内嵌 LOD，以及单独导出的 `_LOD0/_LOD1/...` 静态网格文件。
 - 内置母材质图加入中英双语参数说明区；英文参数名作为自动绑定接口继续保留。
@@ -124,6 +126,8 @@ T_env_RockKit_ORM.png
 - Connected `M_*_Auto` fallback materials when a configured master is missing.
 - Automatic PBR mapping and texture settings for Base Color, Normal, Roughness, Metallic, AO, Emissive, Opacity, Opacity Mask, ORM, RMA, and related aliases.
 - Prefixless Marketplace/Fab filenames with resolution tokens such as `2K` and `4K` ignored during grouping.
+- Asset-group/Atlas category inheritance, Vehicles/Effects routing, and the v1.5.2 Skeletal Mesh fixes.
+- `skm_`, `anim_`, `_alb`, and `_arm` Fab/Marketplace aliases.
 - Atlas/modular-kit workflow with one shared material across multiple meshes.
 - A `Decal` choice in the transparency dialog, backed by a Deferred Decal master material.
 - Embedded FBX LOD import and separately exported `_LOD0/_LOD1/...` Static Mesh files.

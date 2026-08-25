@@ -102,7 +102,15 @@ class FakeRoot:
 
 class LocalizationTests(unittest.TestCase):
     def test_category_round_trip(self):
-        expected = [None, "Environment", "Weapons", "Props", "Characters"]
+        expected = [
+            None,
+            "Environment",
+            "Weapons",
+            "Props",
+            "Characters",
+            "Vehicles",
+            "Effects",
+        ]
         self.assertEqual([category_to_internal(value, "zh_CN") for value in category_options("zh_CN")], expected)
         self.assertEqual([category_to_internal(value, "en_US") for value in category_options("en_US")], expected)
 

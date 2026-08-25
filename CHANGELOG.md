@@ -2,6 +2,10 @@
 
 ## Unreleased — 0.4.0-dev
 
+- Incorporated upstream v1.5.2 category inheritance and Atlas category resolution.
+- Added Vehicles/Effects categories and localized UI choices.
+- Added `skm_`, `anim_`, `_alb`, and `_arm` naming aliases.
+- Incorporated the upstream Skeletal Mesh import and multi-material assignment fixes.
 - Added a localized Decal choice to the transparency workflow.
 - Added a bundled Deferred Decal master material and safe fallback generation.
 - Enabled embedded FBX LOD import and separate `_LOD0/_LOD1/...` Static Mesh files, including Atlas kits.

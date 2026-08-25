@@ -34,9 +34,25 @@ try:
     if material is None:
         raise RuntimeError("Could not create temporary smoke-test material")
 
-    texture_path = "/Game/Python/Materials/T_Default_White_VT"
-    if not unreal.EditorAssetLibrary.load_asset(texture_path):
-        raise RuntimeError(f"Required smoke-test texture is missing: {texture_path}")
+    texture_candidates = (
+        "/Game/Python/Materials/T_Default_White_VT",
+        "/Engine/EngineResources/DefaultTexture",
+        "/Engine/EngineResources/WhiteSquareTexture",
+    )
+    texture_path = next(
+        (
+            candidate
+            for candidate in texture_candidates
+            if unreal.EditorAssetLibrary.does_asset_exist(candidate)
+            and unreal.EditorAssetLibrary.load_asset(candidate)
+        ),
+        None,
+    )
+    if texture_path is None:
+        raise RuntimeError(
+            "No usable smoke-test texture was found: "
+            + ", ".join(texture_candidates)
+        )
 
     textures = [
         SimpleNamespace(

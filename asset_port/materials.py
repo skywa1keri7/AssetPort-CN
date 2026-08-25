@@ -34,6 +34,44 @@ def _master_path(blend_mode, config):
     return config.parent_material_opaque
 
 
+def _is_skeletal_mesh(mesh_object):
+    skeletal_mesh_class = getattr(unreal, "SkeletalMesh", None)
+    return skeletal_mesh_class is not None and isinstance(mesh_object, skeletal_mesh_class)
+
+
+def _assign_material_at_index(mesh_object, index, material):
+    """Assign a material without relying on StaticMesh-only APIs."""
+    if not _is_skeletal_mesh(mesh_object):
+        mesh_object.set_material(index, material)
+        return True
+
+    skeletal_materials = mesh_object.get_editor_property("materials")
+    if index >= len(skeletal_materials):
+        return False
+
+    current = skeletal_materials[index]
+    replacement = unreal.SkeletalMaterial()
+    # Preserve slot metadata when rebuilding the struct. UE returns skeletal
+    # material entries by value, so mutating the old entry is not reliable.
+    for property_name in (
+        "material_slot_name",
+        "imported_material_slot_name",
+        "uv_channel_data",
+        "enable_shadow_casting",
+        "recompute_tangent",
+    ):
+        try:
+            replacement.set_editor_property(
+                property_name, current.get_editor_property(property_name)
+            )
+        except Exception:
+            pass
+    replacement.set_editor_property("material_interface", material)
+    skeletal_materials[index] = replacement
+    mesh_object.set_editor_property("materials", skeletal_materials)
+    return True
+
+
 def _assign_material(mesh_object, material, group, slot_name, config, blend_mode="Opaque"):
     # Deferred decal materials belong on Decal Actors/Components, not in a
     # Static Mesh material slot.
@@ -41,11 +79,14 @@ def _assign_material(mesh_object, material, group, slot_name, config, blend_mode
         return False
 
     if group.is_multi_material:
-        static_mats = mesh_object.get_editor_property("static_materials")
-        for index, mat_slot in enumerate(static_mats):
+        material_slots = mesh_object.get_editor_property(
+            "materials" if _is_skeletal_mesh(mesh_object) else "static_materials"
+        )
+        for index, mat_slot in enumerate(material_slots):
             mesh_slot = str(mat_slot.get_editor_property("material_slot_name"))
             if slot_name.lower() in mesh_slot.lower() or mesh_slot.lower() in slot_name.lower():
-                mesh_object.set_material(index, material)
+                if not _assign_material_at_index(mesh_object, index, material):
+                    return False
                 unreal.log(
                     f"AssetPort: Assigned {material.get_name()} to slot [{index}] '{slot_name}'"
                 )
@@ -53,7 +94,8 @@ def _assign_material(mesh_object, material, group, slot_name, config, blend_mode
                 return True
         return False
 
-    mesh_object.set_material(0, material)
+    if not _assign_material_at_index(mesh_object, 0, material):
+        return False
     unreal.EditorAssetLibrary.save_loaded_asset(mesh_object)
     return True
 
@@ -365,7 +407,8 @@ def create_atlas_material_instance(
             mesh_object = unreal.EditorAssetLibrary.load_asset(mesh.ue_path) if mesh else None
             if mesh_object is None:
                 continue
-            mesh_object.set_material(0, material)
+            if not _assign_material_at_index(mesh_object, 0, material):
+                continue
             unreal.EditorAssetLibrary.save_loaded_asset(mesh_object)
             linked = True
 

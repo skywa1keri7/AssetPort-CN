@@ -1,8 +1,15 @@
 import unreal
 
 from asset_port.config import config_loader
-from asset_port.localization import blend_options, blend_to_internal
+from asset_port.localization import (
+    blend_options,
+    blend_to_internal,
+    category_options,
+    category_to_internal,
+)
 from asset_port.materials import _configure_generated_material
+from asset_port.models import AssetType, DetectedAsset
+from asset_port.presets import get_mesh_setting
 
 
 config = config_loader()
@@ -11,6 +18,15 @@ assert config.parent_material_decal == "/Game/Python/Materials/M_Master_Decal"
 
 internal_modes = [blend_to_internal(value) for value in blend_options()]
 assert internal_modes == ["Masked", "Translucent", "Decal", "Opaque"]
+assert [category_to_internal(value) for value in category_options()] == [
+    None,
+    "Environment",
+    "Weapons",
+    "Props",
+    "Characters",
+    "Vehicles",
+    "Effects",
+]
 
 fbx = unreal.FbxImportUI()
 fbx.static_mesh_import_data.import_mesh_lods = True
@@ -29,6 +45,21 @@ unreal.log(
 assert (
     subsystem is not None and hasattr(subsystem, "import_lod")
 ) or (legacy is not None and hasattr(legacy, "import_lod"))
+
+skeletal_settings = get_mesh_setting(
+    DetectedAsset(
+        filename="SKM_char_Hero.fbx",
+        source_path="SKM_char_Hero.fbx",
+        prefix="skm",
+        base_name="Hero",
+        suffix="",
+        asset_type=AssetType.SKELETAL_MESH,
+        texture_slot=None,
+        extension=".fbx",
+    )
+)
+assert skeletal_settings.mesh_type_to_import == unreal.FBXImportType.FBXIT_SKELETAL_MESH
+assert bool(skeletal_settings.import_as_skeletal) is True
 
 decal_master = unreal.EditorAssetLibrary.load_asset(config.parent_material_decal)
 assert decal_master is not None

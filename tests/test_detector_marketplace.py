@@ -62,6 +62,27 @@ class MarketplaceFilenameTests(unittest.TestCase):
                 self.assertEqual(asset.asset_type, AssetType.TEXTURE)
                 self.assertEqual(asset.texture_slot, slot)
 
+    def test_upstream_v152_aliases(self):
+        self.assertEqual(
+            self.detector.detect_file("SKM_char_Hero.fbx").asset_type,
+            AssetType.SKELETAL_MESH,
+        )
+        self.assertEqual(
+            self.detector.detect_file("ANIM_char_Run.fbx").asset_type,
+            AssetType.ANIMATION,
+        )
+        self.assertEqual(
+            self.detector.detect_file("Rock_Alb.png").texture_slot,
+            TextureSlot.BASE_COLOUR,
+        )
+        self.assertEqual(
+            self.detector.detect_file("Rock_ARM.png").texture_slot,
+            TextureSlot.ORM,
+        )
+        animation = self.detector.detect_file("ANIM_char_Run-Forward.fbx")
+        self.assertEqual(animation.asset_type, AssetType.ANIMATION)
+        self.assertFalse(animation.kit_name)
+
     def test_unknown_files_do_not_create_empty_groups(self):
         unknown = self.detector.detect_file("notes.txt")
 
