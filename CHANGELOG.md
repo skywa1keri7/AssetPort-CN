@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased — 0.4.2-dev
+
+- Fixed dedicated `_Opacity` textures not binding to the bundled Decal master's `OpacityMask` parameter while preserving custom masters that expose `Opacity` directly.
+
 ## [0.4.1] - 2026-08-25
 
 - Added bilingual Chinese/English parameter-group headers to all four bundled master materials.

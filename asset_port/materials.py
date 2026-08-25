@@ -282,7 +282,18 @@ def _create_material_instance(mi_name, mi_package, textures, blend_mode, parent_
         param_name = texture.texture_slot.value
         if has_vt:
             param_name = f"{param_name}_VT"
-        resolved_param_name = resolve_parameter_name(param_name, texture_parameter_names)
+        fallback_names = ()
+        if (
+            texture.texture_slot == TextureSlot.OPACITY
+            and blend_mode in ("Masked", "Translucent", "Decal")
+        ):
+            opacity_mask_name = TextureSlot.OPACITY_MASK.value
+            if has_vt:
+                opacity_mask_name = f"{opacity_mask_name}_VT"
+            fallback_names = (opacity_mask_name,)
+        resolved_param_name = resolve_parameter_name(
+            param_name, texture_parameter_names, fallback_names
+        )
         editing.set_material_instance_texture_parameter_value(
             mi, resolved_param_name, texture_object
         )

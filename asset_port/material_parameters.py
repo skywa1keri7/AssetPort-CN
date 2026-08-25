@@ -59,8 +59,12 @@ def bilingual_parameter_name(legacy_name):
     return PARAMETER_LABELS.get(str(legacy_name), str(legacy_name))
 
 
-def resolve_parameter_name(legacy_name, available_names):
+def resolve_parameter_name(legacy_name, available_names, fallback_names=()):
     """Resolve a parameter on either a bilingual or legacy English master.
+
+    Optional fallback names cover semantically equivalent parameters exposed
+    under different names by a master material.  The requested name always
+    wins, preserving custom-master behavior.
 
     Unknown/custom masters retain the historical behavior: if neither alias
     is advertised, return the legacy name and let Unreal handle the miss.
@@ -68,9 +72,11 @@ def resolve_parameter_name(legacy_name, available_names):
 
     legacy_name = str(legacy_name)
     available = {str(name) for name in available_names}
-    bilingual = bilingual_parameter_name(legacy_name)
-    if bilingual in available:
-        return bilingual
-    if legacy_name in available:
-        return legacy_name
+    candidates = (legacy_name,) + tuple(str(name) for name in fallback_names)
+    for candidate in candidates:
+        bilingual = bilingual_parameter_name(candidate)
+        if bilingual in available:
+            return bilingual
+        if candidate in available:
+            return candidate
     return legacy_name
